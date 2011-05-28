@@ -1,8 +1,9 @@
-require 'gst' #gstreamer support
 require 'json'
+
 require "#{File.dirname(__FILE__)}/settings"
 require "#{File.dirname(__FILE__)}/access_token"
 require "#{File.dirname(__FILE__)}/curl_helper"
+require "#{File.dirname(__FILE__)}/player"
 
 class SoundCLI
 	protected
@@ -48,11 +49,7 @@ class SoundCLI
 		end
 	end
 
-	def get_stream_uri(uri)
-		# get the actual track uri
-		res = self.resolve(uri)
-		return unless res
-
+	def get_stream_uri(res)
 		streamable = res[:response]['streamable']
 
 		unless streamable
@@ -101,44 +98,43 @@ class SoundCLI
 			return false
 		end
 
+		#TODO: curl this
 		puts res[:response]['download_url']
 	end
 
 	# Accepts an address like this:
 	#   "http://soundcloud.com/rekado/the-human-song"
-	# Gets the actual location and streams it with mplayer
+	# Gets the actual location and streams it via gstreamer
 	def stream(uri)
-		stream = self.get_stream_uri(uri)
-		return unless stream
+		print "Resolving #{uri}..."
 
-		# create a reader
-		playbin = Gst::ElementFactory.make("playbin")
-		playbin.uri = stream
-		playbin.play()
+		# get the actual track uri
+		res = self.resolve(uri)
+		return unless res
 
-		# create the program's main loop
-		loop = GLib::MainLoop.new(nil, false)
+		stream = self.get_stream_uri(res)
+		puts "FAIL" and return unless stream
+		puts "DONE"
 
-		# listen to playback events
-		bus = playbin.bus
-		bus.add_watch do |bus, message|
-			case message.type
-			when Gst::Message::EOS
-				loop.quit
-			when Gst::Message::ERROR
-				p message.parse
-				loop.quit
-			end
-			true
-		end
+		# TODO: this doesnt work yet
+		track_id = res[:response]['id']
+		params = ["client_id=#{Settings::CLIENT_ID}"]
+		comments = self.get("track/#{track_id}/comments", false, params)
+		puts comments
 
-		# start playing
-		playbin.play
+		# TODO: make pausing possible
 		begin
-			loop.run
+			player = Player.new(stream, comments)
+			player.play
+			#puts "hit RETURN to pause/resume, Ctrl-C to end"
+			until player.done? do
+				#$stdin.getc
+				#player.pause if player.playing?
+				#player.play if player.paused?
+			end
 		rescue Interrupt
 		ensure
-			playbin.stop
+			player.quit if player
 		end
 	end
 
