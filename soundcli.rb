@@ -94,37 +94,6 @@ EOF
 		puts uri
 	end
 
-	# gets the comments for a track ID
-	def comments(args=[], print=true)
-		arg = args.shift # only take one argument
-		unless arg
-			$stderr.puts "You didn't tell me the soundcloud address or the track ID."
-			return
-		end
-
-		comments = []
-
-		# get comments
-		track_id = arg 
-		params = ["client_id=#{Settings::CLIENT_ID}"]
-		res = Helpers::get({
-			:target => "tracks/#{track_id}/comments",
-			:ssl    => false,
-			:params => params,
-			:follow => true
-		})
-		if res
-			comments = res[:response]
-			comments.sort! {|a,b| a['created_at'] <=> b['created_at']}
-			
-			# only leave timed comments
-			comments.reject! {|c| c['timestamp'].nil?}
-		end
-
-		puts comments if print
-		return comments
-	end
-
 	# Accepts an address like this:
 	#   "http://soundcloud.com/rekado/the-human-song"
 	# or a track ID.
@@ -144,7 +113,7 @@ EOF
 		stream = res['stream_url']
 		return unless stream
 
-		comments = self.comments([track_id], false)
+		comments = Track::comments([track_id], false)
 
 		# TODO: make pausing possible
 		begin

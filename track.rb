@@ -45,4 +45,34 @@ module Track
 		return res[:response]
 	end
 
+	# gets the comments for a track ID
+	def Track::comments(args=[], print=true)
+		arg = args.shift # only take one argument
+		unless arg
+			$stderr.puts "You didn't tell me the soundcloud address or the track ID."
+			return
+		end
+
+		comments = []
+
+		# get comments
+		track_id = arg 
+		params = ["client_id=#{Settings::CLIENT_ID}"]
+		res = Helpers::get({
+			:target => "tracks/#{track_id}/comments",
+			:ssl    => false,
+			:params => params,
+			:follow => true
+		})
+		if res
+			comments = res[:response]
+			# only leave timed comments
+			comments.reject! {|c| c['timestamp'].nil?}
+			comments.sort! {|a,b| a['timestamp'] <=> b['timestamp']}
+		end
+
+		puts comments if print
+		return comments
+	end
+
 end
