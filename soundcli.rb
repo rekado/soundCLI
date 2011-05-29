@@ -1,11 +1,14 @@
-require 'json'
-
 require "#{File.dirname(__FILE__)}/settings"
 require "#{File.dirname(__FILE__)}/access_token"
-require "#{File.dirname(__FILE__)}/curl_helper"
 require "#{File.dirname(__FILE__)}/player"
+require "#{File.dirname(__FILE__)}/track"
+require "#{File.dirname(__FILE__)}/helpers"
 
 class SoundCLI
+	def initialize
+		raise "Authentication error" unless self.authenticate
+	end
+
 	protected
 	def authenticate
 		token_data = AccessToken::latest
@@ -14,58 +17,12 @@ class SoundCLI
 		#TODO: only refresh when 401/403
 		AccessToken::refresh if token_data
 		if token_data and token_data.has_key? 'access_token'
-			return token_data['access_token']
+			@token = token_data['access_token']
+			return true
+		else
+			$stderr.puts "Could not authenticate."
+			return false
 		end
-		$stderr.puts "Could not authenticate."
-		return
-	end
-
-	def resolve(uri)
-		token = self.authenticate
-		return unless token
-
-		params = ["url=#{uri}",
-			"client_id=#{Settings::CLIENT_ID}", 
-			"access_token=#{token}"
-		]
-
-		return self.get('resolve', false, params)
-	end
-
-	def get(target, ssl, params)
-		uri = ssl ? (Settings::API_URI_SSL) : (Settings::API_URI)
-		c = Curl::Easy.new(uri+'/'+target+'.json')
-		params = URI.escape(params.join("&"))
-		c.url = c.url + '?' + params
-		c.follow_location = true
-
-		begin
-			c.http_get
-			response = JSON.parse(c.body_str)
-			headers = c.header_str
-			res = {:response => response, :headers => headers}
-			return res
-		rescue
-			$stderr.puts "Could not connect"
-			return
-		end
-	end
-
-	def get_stream_uri(res)
-		streamable = res[:response]['streamable']
-
-		unless streamable
-			$stderr.puts "This track is not streamable."
-			return nil
-		end
-
-		stream = res[:response]['stream_url']
-
-		token = self.authenticate
-		return nil unless token
-
-		params = ["access_token=#{token}","client_id=#{Settings::CLIENT_ID}"]
-		return CurlHelper::location(stream, params)
 	end
 
 	public
@@ -75,65 +32,124 @@ class SoundCLI
 	end
 
 	def usage
-		"usage: #{$0} #{self.features.join('|')} [url|query]"
+		puts "Usage: #{$0} #{self.features.join('|')} [url|query]"
+		print <<EOF
+
+EXAMPLES:
+
+   Play a track by URL:
+     #{$0} stream http://soundcloud.com/rekado/the-human-song
+
+   Play a track by ID:
+     #{$0} stream 15966266
+	 
+   Show my user info:
+     #{$0} me
+	 
+   List my tracks:
+     #{$0} me tracks
+	 
+   List my exclusive tracks:
+     #{$0} me tracks exclusive
+	
+   Search for a user:
+     #{$0} search_user fronx
+EOF
 	end
 
-	def me
-		token = self.authenticate
-		return unless token
-
-		params = ["oauth_token=#{token}"]
-		res = self.get('me', true, params)
+	def me(args=[])
+		params = ["oauth_token=#{@token}"]
+		sub = (args.length > 0) ? ('/'+args.join('/')) : ('')
+		res = Helpers::get({
+			:target => 'me'+sub,
+			:ssl    => true,
+			:params => params,
+			:follow => true
+		})
 		puts res[:response]
 	end
 
-	def download(uri)
-		res = self.resolve(uri)
-		return false unless res
+	def download(args=[])
+		print "Getting track ID..."
+		track_id = Track::id(args)
+		puts track_id
 
-		downloadable = res[:response]['downloadable']
+		unless track_id
+			puts "FAILED"
+			return false
+		end
+
+		res = Track::info(track_id)
+		downloadable = res['downloadable']
 
 		unless downloadable
 			$stderr.puts "This track cannot be downloaded."
 			return false
 		end
-
+		
+		uri = res['download_url']
+		return false unless uri
+		
 		#TODO: curl this
-		puts res[:response]['download_url']
+		puts uri
 	end
 
-	# Accepts an address like this:
-	#   "http://soundcloud.com/rekado/the-human-song"
-	# Gets the actual location and streams it via gstreamer
-	def stream(uri, type=:track)
-		print "Resolving target..."
+	# gets the comments for a track ID
+	def comments(args=[], print=true)
+		arg = args.shift # only take one argument
+		unless arg
+			$stderr.puts "You didn't tell me the soundcloud address or the track ID."
+			return
+		end
 
-		# get the actual track uri
-		res = self.resolve(uri)
-		return unless res
-
-		stream = self.get_stream_uri(res)
-		return unless stream
-
-		puts "DONE"
+		comments = []
 
 		# get comments
-		track_id = res[:response]['id']
+		track_id = arg 
 		params = ["client_id=#{Settings::CLIENT_ID}"]
-		res = self.get("tracks/#{track_id}/comments", false, params)
+		res = Helpers::get({
+			:target => "tracks/#{track_id}/comments",
+			:ssl    => false,
+			:params => params,
+			:follow => true
+		})
 		if res
 			comments = res[:response]
 			comments.sort! {|a,b| a['created_at'] <=> b['created_at']}
 			
 			# only leave timed comments
 			comments.reject! {|c| c['timestamp'].nil?}
-		else
-			comments = []
 		end
+
+		puts comments if print
+		return comments
+	end
+
+	# Accepts an address like this:
+	#   "http://soundcloud.com/rekado/the-human-song"
+	# or a track ID.
+	# Gets the actual location and streams it via gstreamer
+	def stream(args=[])
+		print "Getting track ID..."
+		track_id = Track::id(args)
+		puts track_id
+
+		print "Getting stream URI..."
+		res = Track::info(track_id)
+		streamable = res['streamable']
+		unless streamable
+			$stderr.puts "This track is not streamable."
+			return nil
+		end
+		stream = res['stream_url']
+		return unless stream
+
+		comments = self.comments([track_id], false)
 
 		# TODO: make pausing possible
 		begin
-			player = Player.new(stream, comments)
+			params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
+			player = Player.new(stream+'?'+params.join('&'), comments)
 			player.play
 		rescue Interrupt
 		ensure
@@ -141,7 +157,8 @@ class SoundCLI
 		end
 	end
 
-	def set(uri)
+	def set(args=[])
+		$stderr.puts "TODO: playlists are not implemented yet"
 		# TODO
 	end
 
@@ -150,7 +167,12 @@ class SoundCLI
 			"q=#{query}",
 			"limit=#{limit}"
 		]
-		res = self.get('users', false, params)
+		res = Helpers::get({
+			:target => 'users',
+			:ssl    => false,
+			:params => params,
+			:follow => true
+		})
 		puts res[:response]
 	end
 end

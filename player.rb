@@ -91,6 +91,7 @@ class Player
 			$stdout.flush
 		when Gst::Message::Type::ERROR
 			@playbin.set_state(Gst::State::NULL)
+			puts msg.parse
 			self.quit
 		when Gst::Message::Type::EOS
 			@playbin.set_state(Gst::State::NULL)
