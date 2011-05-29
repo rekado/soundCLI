@@ -42,10 +42,11 @@ module AccessToken
 				]
 
 			elsif Settings::auth_type == :login
-				print "Username (email): "
-				username = gets
+				$stdout.flush
+				print "\nUsername (email): "
+				username = $stdin.gets
 				print "Password: "
-				password = gets
+				password = $stdin.gets
 
 				params = [
 					"grant_type=password", 
