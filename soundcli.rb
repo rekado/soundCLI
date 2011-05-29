@@ -104,6 +104,10 @@ EOF
 		print "Getting track ID..."
 		track_id = Track::id(args)
 		puts track_id
+		unless track_id
+			puts "FAILED"
+			return false
+		end
 
 		print "Getting stream URI..."
 		res = Track::info(track_id)
