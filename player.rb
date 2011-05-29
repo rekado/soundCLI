@@ -1,17 +1,19 @@
-require 'thread'
 require 'gst' #gem install gstreamer
 
 class Player
 	def initialize(uri, comments)
-		#initialize gst
-		Gst.init
-
 		@comments = comments
+		@comment_ptr = 0
 
-		#make the playbin
+		Gst.init
+		# create the playbin
 		@playbin = Gst::ElementFactory.make("playbin2")
+
+		# TODO: buffer still runs out
+		@playbin.set_property("buffer-size", 512_000)
+		@playbin.set_property("buffer-duration", 5_000_000_000)
+
 		@playbin.set_property("uri",uri)
-		@playbin.set_property("buffer-size",512000)
 
 		#watch the bus for messages
 		bus = @playbin.bus
@@ -45,32 +47,48 @@ class Player
 
 	def play
 		@playbin.play
-		GLib::Timeout.add(1000) do 
-			puts "pos: #{self.position.parse[1]}" #if self.playing?
+		GLib::Timeout.add(100) do 
+			timestamp = self.position.parse[1]/1000000
+
+			if self.playing? and @comment_ptr < @comments.length
+				c = @comments[@comment_ptr]
+
+				if timestamp > c['timestamp']
+					$stdout.flush
+					puts "\n#{c['user']['username']}:"
+					# TODO: pretty print the comment body
+					puts "   #{c['body']}"
+					@comment_ptr+=1
+				end
+			end
 			true
 		end
 		@mainloop = GLib::MainLoop.new
 		@mainloop.run
 	end
 
+	def resume
+		@playbin.set_state(Gst::State::PLAYING)
+		@playbin.play
+	end
+
 	def pause
-		puts "--- paused ---"
+		@playbin.set_state(Gst::State::PAUSED)
 		@playbin.pause
 	end
 
 	def handle_bus_message(msg)
-		print "                             \r"
-		$stdout.flush
 		case msg.type
 		when Gst::Message::Type::BUFFERING
 			buffer = msg.parse
-			if buffer < 90
-				@playbin.set_state(Gst::State::PAUSED)
+			if buffer < 100
+				self.pause if self.playing?
 				print "Buffering: #{buffer}%  \r"
-				$stdout.flush
 			else
-				@playbin.set_state(Gst::State::PLAYING)
+				print "                       \r"
+				self.resume if self.paused?
 			end
+			$stdout.flush
 		when Gst::Message::Type::ERROR
 			@playbin.set_state(Gst::State::NULL)
 			self.quit
@@ -82,14 +100,14 @@ class Player
 	end
 
 	def done?
-		return false unless @playbin.get_state.eql? Gst::State::NULL
+		return (@playbin.get_state[1] == Gst::State::NULL)
 	end
 
 	def playing?
-		return true if @playbin.get_state.eql? Gst::State::PLAYING
+		return (@playbin.get_state[1] == Gst::State::PLAYING)
 	end
 
 	def paused?
-		return true if @playbin.get_state.eql? Gst::State::PAUSED
+		return (@playbin.get_state[1] == Gst::State::PAUSED)
 	end
 end

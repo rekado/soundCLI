@@ -8,9 +8,11 @@ require "#{File.dirname(__FILE__)}/player"
 class SoundCLI
 	protected
 	def authenticate
+		token_data = AccessToken::latest
+		token_data = AccessToken::new unless token_data
+		
 		#TODO: only refresh when 401/403
-		AccessToken::refresh
-		token_data = AccessToken::latest || AccessToken::new
+		AccessToken::refresh if token_data
 		if token_data and token_data.has_key? 'access_token'
 			return token_data['access_token']
 		end
@@ -106,7 +108,7 @@ class SoundCLI
 	#   "http://soundcloud.com/rekado/the-human-song"
 	# Gets the actual location and streams it via gstreamer
 	def stream(uri)
-		print "Resolving #{uri}..."
+		print "Resolving target..."
 
 		# get the actual track uri
 		res = self.resolve(uri)
@@ -116,22 +118,24 @@ class SoundCLI
 		puts "FAIL" and return unless stream
 		puts "DONE"
 
-		# TODO: this doesnt work yet
+		# get comments
 		track_id = res[:response]['id']
 		params = ["client_id=#{Settings::CLIENT_ID}"]
-		comments = self.get("track/#{track_id}/comments", false, params)
-		puts comments
+		res = self.get("tracks/#{track_id}/comments", false, params)
+		if res
+			comments = res[:response]
+			comments.sort! {|a,b| a['created_at'] <=> b['created_at']}
+			
+			# only leave timed comments
+			comments.reject! {|c| c['timestamp'].nil?}
+		else
+			comments = []
+		end
 
 		# TODO: make pausing possible
 		begin
 			player = Player.new(stream, comments)
 			player.play
-			#puts "hit RETURN to pause/resume, Ctrl-C to end"
-			until player.done? do
-				#$stdin.getc
-				#player.pause if player.playing?
-				#player.play if player.paused?
-			end
 		rescue Interrupt
 		ensure
 			player.quit if player
