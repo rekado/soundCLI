@@ -35,7 +35,7 @@ module Settings
 		if arguments
 			# TODO: build config from arguments
 		end
-		$stderr.puts "An error occurred when parsing the configuration file." unless Settings::parse_config
+		$stderr.puts "No config file found or error parsing it. Ignoring." unless Settings::parse_config
 
 		return true if Settings::auth_type == :login
 
@@ -65,10 +65,11 @@ EOF
 		config_path = ENV['XDG_CONFIG_HOME'] or ENV['HOME']+'/.config'
 		config_path = config_path + "/#{PRG_NAME.downcase}"
 		cf = "#{config_path}/#{config_file}"
+		@@config['path'] = config_path
+
 		return false unless File.exists? cf
 
 		begin
-			@@config['path'] = config_path
 			@@config.merge!(JSON.parse(File.read(cf)))
 			return true
 		rescue
