@@ -4,7 +4,7 @@ INTRODUCTION
   respective positions.
 
 EXAMPLES
-  ./run.rb stream http://soundcloud.com/rekado/the-human-song
+  ./soundcli.rb stream http://soundcloud.com/rekado/the-human-song
 
 SETUP
   soundCLI will save your authentication/refresh tokens (not your credentials)
