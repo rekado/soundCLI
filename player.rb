@@ -1,4 +1,4 @@
-require 'gst' #gem install gstreamer
+require 'gst'
 
 class Player
 	def initialize(uri, comments)
