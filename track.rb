@@ -68,7 +68,11 @@ module Track
 			comments = res[:response]
 			# only leave timed comments
 			comments.reject! {|c| c['timestamp'].nil?}
-			comments.sort! {|a,b| a['timestamp'] <=> b['timestamp']}
+			# sort by timestamp first, then by time posted
+			comments.sort! do |a,b|
+				comp = (a['timestamp'] <=> b['timestamp'])
+				comp.zero? ? (a['created_at'] <=> b['created_at']) : comp
+			end
 		end
 
 		puts comments if print
