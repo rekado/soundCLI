@@ -56,19 +56,17 @@ class SoundCLI
 
 		unless streamable
 			$stderr.puts "This track is not streamable."
-			return
+			return nil
 		end
 
 		stream = res[:response]['stream_url']
 
 		token = self.authenticate
-		return unless token
+		return nil unless token
 
 		params = ["access_token=#{token}","client_id=#{Settings::CLIENT_ID}"]
 		return CurlHelper::location(stream, params)
 	end
-
-
 
 	public
 	def features
@@ -107,7 +105,7 @@ class SoundCLI
 	# Accepts an address like this:
 	#   "http://soundcloud.com/rekado/the-human-song"
 	# Gets the actual location and streams it via gstreamer
-	def stream(uri)
+	def stream(uri, type=:track)
 		print "Resolving target..."
 
 		# get the actual track uri
@@ -115,7 +113,8 @@ class SoundCLI
 		return unless res
 
 		stream = self.get_stream_uri(res)
-		puts "FAIL" and return unless stream
+		return unless stream
+
 		puts "DONE"
 
 		# get comments
@@ -140,6 +139,10 @@ class SoundCLI
 		ensure
 			player.quit if player
 		end
+	end
+
+	def set(uri)
+		# TODO
 	end
 
 	def search_user(query, limit=5)
