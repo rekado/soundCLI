@@ -4,7 +4,12 @@ INTRODUCTION
   respective positions.
 
 EXAMPLES
+  Stream 'The Human Song' from soundcloud:
   ./soundcli.rb stream http://soundcloud.com/rekado/the-human-song
+
+	Play the local file 'faded.ogg' and display timed comments for the same song
+	on soundcloud:
+	./soundcli.rb play faded.ogg http://soundcloud.com/rekado/faded
 
 SETUP
   soundCLI will save your authentication/refresh tokens (not your credentials)
@@ -18,7 +23,6 @@ DEPENDENCIES
   - cURL bindings for ruby (curb)
 
 BUGS
-  - buffering doesn't work well
   - download only returns the download url but does not download yet
 
 LICENSE
