@@ -12,7 +12,7 @@ module Settings
 
 	@@config = {}
 	@@auth_code = false
-		# TODO: read from config
+	# TODO: read from config
 	@@auth_type = :login #:authentication_code
 
 	def Settings::all
@@ -66,6 +66,10 @@ EOF
 		config_path = config_path + "/#{PRG_NAME.downcase}"
 		cf = "#{config_path}/#{config_file}"
 		@@config['path'] = config_path
+
+		# TODO: read from config instead
+		@@config['verbose'] = false
+		@@config['buffer-size'] = 512_000
 
 		return false unless File.exists? cf
 

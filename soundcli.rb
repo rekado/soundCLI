@@ -52,7 +52,7 @@ EXAMPLES:
      #{$0} me tracks
 	 
    List my exclusive tracks:
-     #{$0} me tracks exclusive
+     #{$0} me activities tracks exclusive
 	
    Search for a user:
      #{$0} search_user fronx
@@ -93,7 +93,8 @@ EOF
 		return false unless uri
 		
 		#TODO: curl this
-		puts uri
+		params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
+		puts uri+'?'+params.join('&')
 	end
 
 	# Accepts an address like this:
@@ -124,6 +125,7 @@ EOF
 		# TODO: make pausing possible
 		begin
 			params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
+			puts stream+'?'+params.join('&') if Settings::all['verbose']
 			player = Player.new(stream+'?'+params.join('&'), comments)
 			player.play
 		rescue Interrupt

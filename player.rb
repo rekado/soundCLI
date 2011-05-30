@@ -1,18 +1,14 @@
 require 'gst'
+require "#{File.dirname(__FILE__)}/settings"
 
 class Player
 	def initialize(uri, comments)
 		@comments = comments
 		@comment_ptr = 0
 
-		Gst.init
 		# create the playbin
 		@playbin = Gst::ElementFactory.make("playbin2")
-
-		# TODO: buffer still runs out
-		@playbin.set_property("buffer-size", 512_000)
-		@playbin.set_property("buffer-duration", 5_000_000_000)
-
+		@playbin.set_property("buffer-size", Settings::all['buffer-size'])
 		@playbin.set_property("uri",uri)
 
 		#watch the bus for messages
@@ -47,6 +43,8 @@ class Player
 
 	def play
 		@playbin.play
+		puts "Player started"
+
 		GLib::Timeout.add(100) do 
 			timestamp = self.position.parse[1]/1000000
 
@@ -82,12 +80,13 @@ class Player
 		when Gst::Message::Type::BUFFERING
 			buffer = msg.parse
 			if buffer < 100
-				self.pause if self.playing?
 				print "Buffering: #{buffer}%  \r"
+				self.pause if self.playing?
 			else
 				print "                       \r"
 				self.resume if self.paused?
 			end
+
 			$stdout.flush
 		when Gst::Message::Type::ERROR
 			@playbin.set_state(Gst::State::NULL)
