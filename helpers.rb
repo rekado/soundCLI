@@ -1,6 +1,7 @@
 require 'json'
 require 'curb'
 require 'uri'
+require "#{File.dirname(__FILE__)}/settings"
 
 module Helpers
 	# takes a hash:
@@ -40,4 +41,29 @@ module Helpers
 		})
 	end
 
+	def Helpers::comment_pp(comment)
+		user = comment['user']['username']
+		text = comment['body']
+
+
+		puts "\n#{user}:"
+		# pretty-print the comment body
+		words = text.split(' ')
+		line_length = 0
+		formatted = words.inject('') do |r,v|
+			line_length+=v.length
+			if line_length < Settings::all['comment_width']
+				r << v << ' '
+				line_length += 1
+			else
+				r[-1] = "\n"
+				r << v << ' '
+				line_length = v.length + 1
+			end
+			r
+		end
+
+		formatted.each_line {|l| puts ' '*Settings::all['comment_indent_width']+l}
+		print "\n"
+	end
 end
