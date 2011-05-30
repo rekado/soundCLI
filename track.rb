@@ -3,8 +3,7 @@ require "#{File.dirname(__FILE__)}/settings"
 require "#{File.dirname(__FILE__)}/helpers"
 
 module Track
-	def Track::id(args=[]) 
-		arg = args.shift # only take one argument
+	def Track::id(arg) 
 		unless arg
 			$stderr.puts "You didn't tell me the soundcloud address or the track ID."
 			return nil
