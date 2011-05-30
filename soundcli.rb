@@ -73,7 +73,7 @@ EOF
 
 	def download(args=[])
 		print "Getting track ID..."
-		track_id = Track::id(args)
+		track_id = Track::id(args[0])
 		puts track_id
 
 		unless track_id
@@ -103,7 +103,7 @@ EOF
 	# Gets the actual location and streams it via gstreamer
 	def stream(args=[])
 		print "Getting track ID..."
-		track_id = Track::id(args)
+		track_id = Track::id(args[0])
 		puts track_id
 		unless track_id
 			puts "FAILED"
@@ -127,6 +127,37 @@ EOF
 			params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
 			puts stream+'?'+params.join('&') if Settings::all['verbose']
 			player = Player.new(stream+'?'+params.join('&'), comments)
+			player.play
+		rescue Interrupt
+		ensure
+			player.quit if player
+		end
+	end
+
+	# Accepts a local file and an address like this
+	#   "http://soundcloud.com/rekado/the-human-song"
+	# or a track ID.
+	# Plays the local file and shows soundcloud comments
+	def play(args=[])
+		if args.length < 2
+			$stderr.puts "I need a local file name and a soundcloud address / track ID."
+			return false
+		end
+		location = File.absolute_path(args[0])
+		unless File.exists? location
+			$stderr.puts "#{args[0]} doesn't seem to be a file."
+			return false
+		end
+
+		track_id = Track::id(args[1])
+		unless track_id
+			$stderr.puts "I could not find this track on soundcloud: #{args[1]}."
+			return false
+		end
+
+		comments = Track::comments([track_id], false)
+		begin
+			player = Player.new('file://'+location, comments)
 			player.play
 		rescue Interrupt
 		ensure
