@@ -8,9 +8,12 @@ respective positions.
 
 - Stream 'The Human Song' from soundcloud:
 
+
     ./soundcli.rb stream http://soundcloud.com/rekado/the-human-song
 
+
 - Play the local file 'faded.ogg' and display timed comments for the same song on soundcloud:
+
 
     ./soundcli.rb play faded.ogg http://soundcloud.com/rekado/faded
 
@@ -45,10 +48,9 @@ will be saved to $XDG_CONFIG_HOME/soundcli.
     No URI handler implemented for "http"
     gsturidecodebin.c(1065): gen_source_element (): /GstPlayBin2:playbin20/GstURIDecodeBin:uridecodebin0
 
-	**A:** You are probably missing some gstreamer plugins. Install a bunch of
-	       them through your package management system and see if the error disappears.
+  **A:** You are probably missing some gstreamer plugins. Install a bunch of them through your package management system and see if the error disappears.
 
-	**Q:** When attempting to run soundCLI I get an error:
+  **Q:** When attempting to run soundCLI I get an error:
 	
     no such file to load -- json/gst/curb in ...
 
