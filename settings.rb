@@ -10,39 +10,22 @@ module Settings
 	API_URI_SSL   = "https://api.soundcloud.com"
 	API_URI       = "http://api.soundcloud.com"
 
-	@@config = {}
-	@@auth_code = false
-	# TODO: read from config
-	@@auth_type = :login #:authentication_code
+	@config = {}
 
-	def Settings::all
-		return @@config
+	def self.all
+		@config
 	end
 
-	def Settings::set_auth_type(v)
-		@@auth_type = v
-	end
-
-	def Settings::auth_type
-		return @@auth_type
-	end
-
-	def Settings::auth_code_available
-		return @@auth_code
-	end
-
-	def Settings::init(arguments)
+	def self.init(arguments)
 		if arguments
 			# TODO: build config from arguments
 		end
-		$stderr.puts "No config file found or error parsing it. Ignoring." unless Settings::parse_config
+		$stderr.puts "No config file found or error parsing it. Ignoring." unless parse_config
 
-		return true if Settings::auth_type == :login
+		return true if all['auth_type'] == 'login'
 
 		# check if an auth code exists
-		if Settings::all.has_key? 'code'
-			@@auth_code = true
-		else
+		unless all.has_key? 'code'
 			print <<EOF
 You did not specify your authorization code.
 If you don't have one, you should first authorize soundCLI.
@@ -60,23 +43,24 @@ EOF
 		end
 	end
 
-	def Settings::parse_config
+	def self.parse_config
 		config_file = "#{PRG_NAME.downcase}.conf"
 		config_path = ENV['XDG_CONFIG_HOME'] or ENV['HOME']+'/.config'
 		config_path = config_path + "/#{PRG_NAME.downcase}"
 		cf = "#{config_path}/#{config_file}"
-		@@config['path'] = config_path
+		@config['path'] = config_path
 
 		# TODO: read from config instead
-		@@config['verbose'] = false
-		@@config['buffer-size'] = 512_000
-		@@config['comment_width'] = 50
-		@@config['comment_indent_width'] = 4
+		@config['auth_type'] = 'login'  # 'authentication_code'
+		@config['verbose'] = false
+		@config['buffer-size'] = 512_000
+		@config['comment_width'] = 50
+		@config['comment_indent_width'] = 4
 
 		return false unless File.exists? cf
 
 		begin
-			@@config.merge!(JSON.parse(File.read(cf)))
+			@config.merge!(JSON.parse(File.read(cf)))
 			return true
 		rescue
 			$stderr.puts "Your configuration file contains errors."

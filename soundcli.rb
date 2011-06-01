@@ -8,26 +8,11 @@ require "#{File.dirname(__FILE__)}/helpers"
 
 class SoundCLI
 	def initialize
-		raise "Authentication error" unless self.authenticate
+		self.authenticate || raise("Authentication error")
 	end
 
-	protected
-	def authenticate
-		token_data = AccessToken::latest
-		token_data = AccessToken::new unless token_data
-		
-		#TODO: only refresh when 401/403
-		AccessToken::refresh if token_data
-		if token_data and token_data.has_key? 'access_token'
-			@token = token_data['access_token']
-			return true
-		else
-			$stderr.puts "Could not authenticate."
-			return false
-		end
-	end
+public
 
-	public
 	def features
 		hidden = [:usage, :features]
 		return (SoundCLI.public_instance_methods - Object.methods - hidden)
@@ -182,6 +167,23 @@ EOF
 			:follow => true
 		})
 		puts res[:response]
+	end
+
+protected
+
+	def authenticate
+		token_data = AccessToken::latest
+		token_data = AccessToken::new unless token_data
+		
+		#TODO: only refresh when 401/403
+		AccessToken::refresh if token_data
+		if token_data and token_data.has_key? 'access_token'
+			@token = token_data['access_token']
+			return true
+		else
+			$stderr.puts "Could not authenticate."
+			return false
+		end
 	end
 end
 
