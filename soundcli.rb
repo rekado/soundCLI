@@ -174,9 +174,8 @@ protected
 	def authenticate
 		token_data = AccessToken::latest
 		token_data = AccessToken::new unless token_data
-		
-		#TODO: only refresh when 401/403
-		AccessToken::refresh if token_data
+		AccessToken::refresh if token_data and AccessToken::expired?
+
 		if token_data and token_data.has_key? 'access_token'
 			@token = token_data['access_token']
 			return true

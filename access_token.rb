@@ -8,6 +8,17 @@ module AccessToken
 		return Settings::all['path']+'/auth'
 	end
 
+  def self.expired?
+    token = latest
+
+    raise "cannot check token expiry: no token" unless token
+    raise "cannot check token expiry: no auth file (did authorization fail?)" unless File.exists? auth_file
+
+    # the token is considered expired when less than 30 secs validity is left
+    expires = File.mtime(auth_file) + token['expires_in']
+    (expires - 30) < Time.now
+  end
+
 	def self.refresh
 		token = latest
 		$stderr.puts "There is no token to refresh." and return false unless token
