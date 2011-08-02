@@ -22,25 +22,31 @@ public
 		puts "Usage: #{$0} #{self.features.join('|')} [url|query]"
 		print <<EOF
 
+
 EXAMPLES:
 
    Play a track by URL:
-     #{$0} stream http://soundcloud.com/rekado/the-human-song
+       #{$0} stream http://soundcloud.com/rekado/the-human-song
+       #{$0} http://soundcloud.com/rekado/the-human-song
 
    Play a track by ID:
-     #{$0} stream 15966266
+       #{$0} stream 15966266
 	 
+
+
+UNFINISHED STUFF:
+
    Show my user info:
-     #{$0} me
+       #{$0} me
 	 
    List my tracks:
-     #{$0} me tracks
+       #{$0} me tracks
 	 
    List my exclusive tracks:
-     #{$0} me activities tracks exclusive
+       #{$0} me activities tracks exclusive
 	
    Search for a user:
-     #{$0} search_user fronx
+       #{$0} search_user fronx
 EOF
 	end
 
@@ -205,6 +211,11 @@ if app.features.include? ARGV[0].to_sym
 		app.method(ARGV[0]).call
 	end
 else
-	$stderr.puts "No such action: #{ARGV[0]}"
-	app.usage and Process.exit(1)
+  # stream if the only argument is a soundcloud link
+  if ARGV[0][/^http:\/\/soundcloud/]
+    app.stream [ARGV[0]]
+  else
+    $stderr.puts "No such action: #{ARGV[0]}"
+    app.usage and Process.exit(1)
+  end
 end
