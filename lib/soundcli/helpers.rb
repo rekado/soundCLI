@@ -13,7 +13,7 @@ module Helpers
 	#  returns HTTP response as hash
 	#  - headers
 	#  - response
-	def Helpers::get(args={})
+	def self.get(args={})
 		return false if args.empty?
 
 		host = args[:ssl] ? (Settings::API_URI_SSL) : (Settings::API_URI)
@@ -31,9 +31,9 @@ module Helpers
 		end
 	end
 
-	def Helpers::resolve(uri)
+	def self.resolve(uri)
 		params = ["url=#{uri}", "client_id=#{Settings::CLIENT_ID}"]
-		return Helpers::get({
+		return self.get({
 			:target => 'resolve',
 			:ssl    => false,
 			:params => params,
@@ -41,10 +41,9 @@ module Helpers
 		})
 	end
 
-	def Helpers::comment_pp(comment)
+	def self.comment_pp(comment)
 		user = comment['user']['username']
 		text = comment['body']
-
 
 		puts "\n#{user}:"
 		# pretty-print the comment body
