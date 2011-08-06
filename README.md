@@ -6,10 +6,10 @@ respective positions.
 
 ## Examples
 
-- Stream 'The Human Song' from soundcloud:
+- Stream 'Chroma' from soundcloud (the keyword 'stream' is optional):
 
 
-    ./soundcli.rb stream http://soundcloud.com/rekado/the-human-song
+    ./soundcli.rb stream http://soundcloud.com/rekado/chroma
 
 
 - Play the local file 'faded.ogg' and display timed comments for the same song on soundcloud:
@@ -28,6 +28,8 @@ will be saved to $XDG_CONFIG_HOME/soundcli.
 
 
 ## Dependencies
+
+- ruby (I'm using 1.9.2, but lower versions might work, too)
 
 - gstreamer bindings for ruby (gst)
 
@@ -51,7 +53,7 @@ will be saved to $XDG_CONFIG_HOME/soundcli.
   **A:** You are probably missing some gstreamer plugins. Install a bunch of them through your package management system and see if the error disappears.
 
   **Q:** When attempting to run soundCLI I get an error:
-	
+
     no such file to load -- json/gst/curb in ...
 
   **A:** You need to install the gems listed in the section DEPENDENCIES
