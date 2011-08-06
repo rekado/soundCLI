@@ -9,20 +9,55 @@ respective positions.
 - Stream 'Chroma' from soundcloud (the keyword 'stream' is optional):
 
 
-    ./soundcli.rb stream http://soundcloud.com/rekado/chroma
+    soundcli stream http://soundcloud.com/rekado/chroma
 
 
-- Play the local file 'faded.ogg' and display timed comments for the same song on soundcloud:
+- Play the local file 'faded.ogg' and display timed comments for the same song
+  on soundcloud:
 
 
-    ./soundcli.rb play faded.ogg http://soundcloud.com/rekado/faded
+    soundcli play faded.ogg http://soundcloud.com/rekado/faded
+
+
+## Installation
+
+You can either install this as a gem or execute it without installation. To
+simply run soundcli, issue the following command from within the soundcli
+directory.
+
+    ruby -Ilib ./bin/soundcli http://soundcloud.com/rekado/chroma
+
+Here's how to build and install this gem manually.
+
+    gem build soundcli.gemspec
+    gem install ./soundcli-0.1.gem
+
+Then you can use this simpler command to stream a song:
+
+    ./bin/soundcli http://soundcloud.com/rekado/chroma
+
+You probably should configure rubygems to install to `/usr/local/bin` or some
+other directory that's in your PATH to execute it from any directory.
+
+
+## Packaging
+
+The preferred way is, of course, to install soundCLI through your
+distribution's package manager (pretend you didn't read this if you are using
+MacOS). SoundCLI has been packaged for the following GNU/Linux distributions:
+
+- Archlinux
+
+You can inspect the package file descriptions in the directory `pkgdesc`.
+Feel free to submit package descriptions for other systems.
+
 
 
 ## Setup
 
 soundCLI will save your authentication/refresh tokens (not your credentials)
 in a file, so you only need to provide your credentials once. The token file
-will be saved to $XDG_CONFIG_HOME/soundcli.
+will be saved to $XDG_CONFIG_HOME/soundcli/auth.
 
     mkdir ~/.config/soundcli
 
@@ -31,7 +66,7 @@ will be saved to $XDG_CONFIG_HOME/soundcli.
 
 - ruby (I'm using 1.9.2, but lower versions might work, too)
 
-- gstreamer bindings for ruby (gst)
+- gstreamer bindings for ruby (gstreamer)
 
 - cURL bindings for ruby (curb)
 
