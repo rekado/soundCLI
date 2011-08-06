@@ -95,6 +95,18 @@ class Player
 			true
 		end
 		@mainloop = GLib::MainLoop.new
+    iochannel = GLib::IOChannel.new(1)
+    iochannel.add_watch(GLib::IOChannel::IN) {|channel, condition|
+      input = channel.readline
+      if input["\n"]
+        if playing?
+          self.pause
+        else
+          self.resume
+        end
+      end
+      true
+    }
 		@mainloop.run
 	end
 
@@ -106,6 +118,7 @@ class Player
 	def pause
 		@playbin.set_state(Gst::State::PAUSED)
 		@playbin.pause
+    print "--- PAUSED ---\r"
 	end
 
 	def handle_bus_message(msg)
