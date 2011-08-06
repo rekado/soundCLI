@@ -1,10 +1,8 @@
-#!/usr/bin/env ruby
-
-require "#{File.dirname(__FILE__)}/settings"
-require "#{File.dirname(__FILE__)}/access_token"
-require "#{File.dirname(__FILE__)}/player"
-require "#{File.dirname(__FILE__)}/track"
-require "#{File.dirname(__FILE__)}/helpers"
+require "soundcli/settings"
+require "soundcli/access_token"
+require "soundcli/player"
+require "soundcli/track"
+require "soundcli/helpers"
 
 class SoundCLI
 	def initialize
@@ -48,6 +46,7 @@ UNFINISHED STUFF:
    Search for a user:
        #{$0} search_user fronx
 EOF
+
 	end
 
 	def me(args=[])
@@ -190,32 +189,5 @@ protected
 			return false
 		end
 	end
-end
 
-#----------------------------------------------------
-# MAIN
-#----------------------------------------------------
-
-Settings::init(ARGV)
-app = SoundCLI.new
-
-if ARGV.length < 1
-	puts app.usage
-	Process.exit 1
-end
-
-if app.features.include? ARGV[0].to_sym
-	if ARGV[1]
-		app.method(ARGV[0]).call(ARGV[1..-1])
-	else
-		app.method(ARGV[0]).call
-	end
-else
-  # stream if the only argument is a soundcloud link
-  if ARGV[0][/^http:\/\/soundcloud/]
-    app.stream [ARGV[0]]
-  else
-    $stderr.puts "No such action: #{ARGV[0]}"
-    app.usage and Process.exit(1)
-  end
 end

@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require 'soundcli'
+
+Settings::init(ARGV)
+app = SoundCLI.new
+
+if ARGV.length < 1
+	puts app.usage
+	Process.exit 1
+end
+
+if app.features.include? ARGV[0].to_sym
+	if ARGV[1]
+		app.method(ARGV[0]).call(ARGV[1..-1])
+	else
+		app.method(ARGV[0]).call
+	end
+else
+  # stream if the only argument is a soundcloud link
+  if ARGV[0][/^http:\/\/soundcloud/]
+    app.stream [ARGV[0]]
+  else
+    $stderr.puts "No such action: #{ARGV[0]}"
+    app.usage and Process.exit(1)
+  end
+end

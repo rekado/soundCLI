@@ -1,6 +1,6 @@
 require 'json'
-require "#{File.dirname(__FILE__)}/settings"
-require "#{File.dirname(__FILE__)}/helpers"
+require "soundcli/settings"
+require "soundcli/helpers"
 
 module Track
 	def Track::id(arg) 

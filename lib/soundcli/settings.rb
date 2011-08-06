@@ -49,6 +49,7 @@ EOF
 		config_path = config_path + "/#{PRG_NAME.downcase}"
 		cf = "#{config_path}/#{config_file}"
 		@config['path'] = config_path
+    puts config_path
 
 		# TODO: read from config instead
 		@config['auth_type'] = 'login'  # 'authentication_code'

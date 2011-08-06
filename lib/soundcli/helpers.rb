@@ -1,7 +1,7 @@
 require 'json'
 require 'curb'
 require 'uri'
-require "#{File.dirname(__FILE__)}/settings"
+require "soundcli/settings"
 
 module Helpers
 	# takes a hash:

@@ -1,6 +1,6 @@
 require 'gst'
-require "#{File.dirname(__FILE__)}/settings"
-require "#{File.dirname(__FILE__)}/helpers"
+require "soundcli/settings"
+require "soundcli/helpers"
 
 class Player
 	def initialize(uri, comments)
