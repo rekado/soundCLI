@@ -46,7 +46,7 @@ The preferred way is, of course, to install soundCLI through your
 distribution's package manager (pretend you didn't read this if you are using
 MacOS). SoundCLI has been packaged for the following GNU/Linux distributions:
 
-- Archlinux
+- Archlinux (https://aur.archlinux.org/packages.php?ID=51472)
 
 You can inspect the package file descriptions in the directory `pkgdesc`.
 Feel free to submit package descriptions for other systems.
