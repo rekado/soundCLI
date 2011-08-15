@@ -1,19 +1,33 @@
 # Maintainer: Ricardo Wurmus <maintainer name + @gmail.com>
 pkgname=soundcli
-pkgver=0.0.2
+pkgver=20110815
 pkgrel=1
 pkgdesc="Command line interface to stream/download songs from soundcloud.com"
 url="http://soundcli.elephly.net"
 arch=('x86_64' 'i686')
 license=('GPLv3')
-depends=('ruby' 'gstreamer0.10' 'gstreamer0.10-base' 'gstreamer0.10-good' 'ruby-gstreamer' 'ruby-curb' 'ruby-json')
+depends=('ruby' 'ruby-gstreamer' 'ruby-curb' 'ruby-json' 'gstreamer0.10-good')
 makedepends=(rubygems)
-source=(http://rubygems.org/downloads/$pkgname-$pkgver.gem)
 md5sums=('f108d2d5df14653c0e5829d978ea1af9')
+
+_gitroot="git://github.com/rekado/soundCLI.git"
+_gitname="soundcli"
 
 build() {
   cd $srcdir
-  local _gemdir="$(ruby -rubygems -e'puts Gem.default_dir')"
+  msg "Connecting to GIT server..."
 
-  gem install --ignore-dependencies --verbose -i "$pkgdir$_gemdir" -n "$pkgdir/usr/bin" $pkgname-$pkgver.gem
+  if [ -d $_gitname ] ; then
+    cd $_gitname && git pull origin
+    msg "The local files are updated."
+  else
+    git clone $_gitroot $_gitname
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Installing..."
+
+  cd "$srcdir/$_gitname"
+  ruby ./setup.rb --verbose all --prefix=${pkgdir}/usr \
+    --siterubyver=${pkgdir}/usr/lib/ruby/site_ruby/1.9.1/
 }
