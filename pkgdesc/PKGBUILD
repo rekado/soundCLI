@@ -12,10 +12,9 @@ source=(https://github.com/rekado/soundCLI/tarball/$pkgver)
 md5sums=('')
 
 build() {
-  cd $srcdir
+  cd $srcdir/$pkgname
   msg "Running setup.rb..."
 
-  cd "$srcdir/$_gitname"
   ruby ./setup.rb --verbose all --prefix=${pkgdir}/usr \
     --siterubyver=${pkgdir}/usr/lib/ruby/site_ruby/1.9.1/
 }
