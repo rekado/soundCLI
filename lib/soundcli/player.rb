@@ -73,17 +73,20 @@ class Player
   def play
     @playbin.play
 
-    GLib::Timeout.add(100) do 
+    GLib::Timeout.add(100) do
       @duration = self.ns_to_str(self.duration.parse[1]) if (@duration.nil?)
       @position = self.ns_to_str(self.position.parse[1])
       timestamp = self.position.parse[1]/1000000
 
       if self.playing?
-        print "#{@position}/#{@duration}  \r"
+        Helpers::say("#{@position}/#{@duration}  \r", :normal)
         $stdout.flush
       end
 
-      if self.playing? and @comment_ptr < @comments.length
+      if (not Settings::all['verbose'].eql? 'mute') and
+        self.playing? and
+        @comment_ptr < @comments.length
+
         c = @comments[@comment_ptr]
 
         if timestamp > c['timestamp']
@@ -118,7 +121,7 @@ class Player
   def pause
     @playbin.set_state(Gst::State::PAUSED)
     @playbin.pause
-    print "--- PAUSED ---\r"
+    Helpers::say("--- PAUSED ---\r", :normal)
   end
 
   def handle_bus_message(msg)
@@ -126,17 +129,17 @@ class Player
     when Gst::Message::Type::BUFFERING
       buffer = msg.parse
       if buffer < 100
-        print "Buffering: #{buffer}%  \r"
+        Helpers::say("Buffering: #{buffer}%  \r", :normal)
         self.pause if self.playing?
       else
-        print "                       \r"
+        Helpers::say("                       \r", :normal)
         self.resume if self.paused?
       end
 
       $stdout.flush
     when Gst::Message::Type::ERROR
       @playbin.set_state(Gst::State::NULL)
-      puts msg.parse
+      $stderr.puts msg.parse
       self.quit
     when Gst::Message::Type::EOS
       @playbin.set_state(Gst::State::NULL)

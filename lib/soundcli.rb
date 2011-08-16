@@ -62,12 +62,12 @@ EOF
   end
 
   def download(args=[])
-    print "Getting track ID..."
+    Helpers::say("Getting track ID...", :info)
     track_id = Track::id(args[0])
-    puts track_id
+    Helpers::sayn(track_id, :info)
 
     unless track_id
-      puts "FAILED"
+      $stderr.puts "Failed to fetch track id."
       return false
     end
 
@@ -92,15 +92,16 @@ EOF
   # or a track ID.
   # Gets the actual location and streams it via gstreamer
   def stream(args=[])
-    print "Getting track ID..."
+    Helpers::say("Getting track ID...", :info)
     track_id = Track::id(args[0])
-    puts track_id
+    Helpers::sayn(track_id, :info)
+
     unless track_id
-      puts "FAILED"
+      $stderr.puts "Failed to fetch track id."
       return false
     end
 
-    print "Getting stream URI..."
+    Helpers::say("Getting stream URI...", :info)
     res = Track::info(track_id)
     streamable = res['streamable']
     unless streamable
@@ -114,7 +115,7 @@ EOF
 
     begin
       params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
-      puts stream+'?'+params.join('&') if Settings::all['verbose']
+      Helpers::sayn(stream+'?'+params.join('&'), :debug)
       player = Player.new(stream+'?'+params.join('&'), comments)
       player.play
     rescue Interrupt

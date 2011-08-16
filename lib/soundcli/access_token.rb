@@ -38,12 +38,12 @@ module AccessToken
     # retry authentication with user credentials
     begin
 
-      if Settings::all['auth_type'] == 'authentication_code'
+      if Settings::all['auth-type'] == 'authentication_code'
         unless Settings::all.has_key? 'code'
           # start over
           $stderr.puts "Cannot request access token without code.\nContinuing with default login."
-          Settings::all['auth_type'] = 'login'
-          raise "retry" 
+          Settings::all['auth-type'] = 'login'
+          raise "retry"
         end
         params = [
           "grant_type=authorization_code",
@@ -51,7 +51,7 @@ module AccessToken
           "code=#{Settings::all['code']}"
         ]
 
-      elsif Settings::all['auth_type'] == 'login'
+      elsif Settings::all['auth-type'] == 'login'
         $stdout.flush
         print "\nUsername (email): "
         username = $stdin.gets
@@ -59,7 +59,7 @@ module AccessToken
         password = $stdin.gets
 
         params = [
-          "grant_type=password", 
+          "grant_type=password",
           "username=#{username.chomp}",
           "password=#{password.chomp}"
         ]
