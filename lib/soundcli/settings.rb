@@ -34,7 +34,7 @@ Visit this URI:
       #{Settings::CONNECT_URI}
 
 You will be given an authorization code, which you should
-add to soundcli.conf in $XDG_CONFIG_HOME.
+add to soundcli.conf in #{ENV['XDG_CONFIG_HOME']}/soundcli/.
 
 If you choose not to connect soundCLI with your soundcloud
 account, you may want to change the preferred authentication
@@ -50,6 +50,12 @@ EOF
     config_path = config_path + "/#{PRG_NAME.downcase}"
     cf = "#{config_path}/#{config_file}"
     @config['path'] = config_path
+
+    # if there is no customized config, use the one in /etc
+    unless File.exists? cf
+      config_path = '/etc'
+      cf = "#{config_path}/#{config_file}"
+    end
 
     # defaults
     @config['auth-type'] = 'login'
