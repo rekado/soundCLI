@@ -27,6 +27,9 @@ EXAMPLES:
        #{$0} stream 15966266
        #{$0} 15966266
 
+   Stream a whole playlist:
+       #{$0} set http://soundcloud.com/rekado/sets/staging/
+
 
 
 UNFINISHED STUFF:
@@ -103,7 +106,7 @@ EOF
         params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
         Helpers::sayn(res['stream_url']+'?'+params.join('&'), :debug)
         title = "Now playing: \"#{res['title']}\""
-        Helpers::sayn("\n\n"+title+"\n"+"=" * title.length + "\n", :normal)
+        Helpers::sayn("\n\n"+title+"\n"+"=" * title.length, :normal)
         player = Player.new(res['stream_url']+'?'+params.join('&'), comments)
         player.play
       rescue Interrupt
