@@ -17,8 +17,8 @@ if app.features.include? ARGV[0].to_sym
     app.method(ARGV[0]).call
   end
 else
-  # stream if the only argument is a soundcloud link
-  if ARGV[0][/^http:\/\/soundcloud/]
+  # stream if the only argument is a soundcloud link or an id
+  if ARGV[0][/^http:\/\/soundcloud/] or ARGV[0][/[0-9]+/]
     app.stream [ARGV[0]]
   else
     $stderr.puts "No such action: #{ARGV[0]}"

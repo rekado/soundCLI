@@ -31,14 +31,29 @@ module Helpers
     end
   end
 
-  def self.resolve(uri)
-    params = ["url=#{uri}", "client_id=#{Settings::CLIENT_ID}"]
-    return self.get({
-      :target => 'resolve',
-      :ssl    => false,
-      :params => params,
-      :follow => false
-    })
+  def self.resolve(arg)
+    $stderr.puts "You didn't give me a soundcloud address to resolve." and return unless arg
+
+    # is an URI, needs resolving
+    if arg[/^http/]
+      params = ["url=#{arg}", "client_id=#{Settings::CLIENT_ID}"]
+      res = self.get({
+        :target => 'resolve',
+        :ssl    => false,
+        :params => params,
+        :follow => false
+      })
+      return unless res
+
+      # get resource id
+      r = /^Location: .*\/([0-9]*).json.*/
+      m = r.match(res[:headers])
+      return m[1] if m
+
+    # its a resource id already
+    else
+      return arg
+    end
   end
 
   def self.say(s, level)

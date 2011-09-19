@@ -3,30 +3,6 @@ require "soundcli/settings"
 require "soundcli/helpers"
 
 module Track
-  def self.id(arg) 
-    unless arg
-      $stderr.puts "You didn't tell me the soundcloud address or the track ID."
-      return nil
-    end
-
-    # is an URI, needs resolving
-    if arg[/^http/]
-      # get the actual track uri
-      res = Helpers::resolve(arg)
-      return nil unless res
-
-      # get track id
-      r = /^Location: .*\/([0-9]*).json.*/
-      m = r.match(res[:headers])
-      track_id = m[1] if m
-
-    # its a track id
-    else
-      track_id = arg
-    end
-    return track_id
-  end
-
   def self.info(track_id)
     params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
     res = Helpers::get({
@@ -55,7 +31,7 @@ module Track
     comments = []
 
     # get comments
-    track_id = arg 
+    track_id = arg
     params = ["client_id=#{Settings::CLIENT_ID}"]
     res = Helpers::get({
       :target => "tracks/#{track_id}/comments",

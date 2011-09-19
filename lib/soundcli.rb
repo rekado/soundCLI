@@ -25,6 +25,7 @@ EXAMPLES:
 
    Play a track by ID:
        #{$0} stream 15966266
+       #{$0} 15966266
 
 
 
@@ -61,7 +62,7 @@ EOF
   def download(args=[])
     self.authenticate || raise("Authentication error")
     Helpers::say("Getting track ID...", :info)
-    track_id = Track::id(args[0])
+    track_id = Helpers::resolve(args[0])
     Helpers::sayn(track_id, :info)
 
     unless track_id
@@ -92,7 +93,7 @@ EOF
   def stream(args=[])
     self.authenticate || raise("Authentication error")
     Helpers::say("Getting track ID...", :info)
-    track_id = Track::id(args[0])
+    track_id = Helpers::resolve(args[0])
     Helpers::sayn(track_id, :info)
 
     unless track_id
@@ -139,7 +140,7 @@ EOF
       return false
     end
 
-    track_id = Track::id(args[1])
+    track_id = Helpers::resolve(args[1])
     unless track_id
       $stderr.puts "I could not find this track on soundcloud: #{args[1]}."
       return false
@@ -157,8 +158,9 @@ EOF
 
   def set(args=[])
     self.authenticate || raise("Authentication error")
-    $stderr.puts "TODO: playlists are not implemented yet"
     # TODO
+    set_id = Helpers::resolve(args[0])
+    puts set_id
   end
 
   def search_user(query, limit=5)
