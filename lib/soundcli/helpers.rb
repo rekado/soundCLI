@@ -87,15 +87,11 @@ module Helpers
     say("#{s}\n", level)
   end
 
-  def self.comment_pp(comment)
-    user = comment['user']['username']
-    text = comment['body']
-
-    puts "\n#{user}:"
-    # pretty-print the comment body
+  def self.split_text(text)
     words = text.split(' ')
     line_length = 0
-    formatted = words.inject('') do |r,v|
+
+    words.inject('') do |r,v|
       line_length+=v.length
       if line_length < Settings::all['comment-width']
         r << v << ' '
@@ -107,8 +103,15 @@ module Helpers
       end
       r
     end
+  end
 
-    formatted.each_line {|l| puts ' '*Settings::all['comment-indent-width']+l}
+  def self.comment_pp(comment)
+    user = comment['user']['username']
+    text = comment['body']
+
+    puts "\n#{user}:"
+    # pretty-print the comment body
+    self.split_text(text).each_line {|l| puts ' '*Settings::all['comment-indent-width']+l}
     print "\n"
   end
 
@@ -121,7 +124,24 @@ module Helpers
 
       hash.each_pair do |k,v|
         next unless v
-        puts "#{k.rjust(longest)} |  #{v}"
+        if v.class.eql? Hash
+          v.each_pair do |subkey, subvalue|
+            puts "#{k.rjust(longest)} |  #{subkey}: #{subvalue}"
+            k = ''
+          end
+        else
+          # for strings
+          v = self.split_text(v.to_s)
+          if v.lines.count <= 1
+            puts "#{k.rjust(longest)} |  #{v}"
+          else
+            v.lines.each_with_index do |line, index|
+              puts "#{k.rjust(longest)} |  #{line}"
+              k = ''
+            end
+          end
+        end
+
       end
     end
 
