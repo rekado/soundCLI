@@ -12,6 +12,18 @@ respective positions.
     soundcli stream http://soundcloud.com/rekado/chroma
 
 
+- Stream three songs from soundcloud:
+
+
+    soundcli stream http://soundcloud.com/rekado/{chroma,the-human-song,faded}
+
+
+- Stream all songs in rekado's playlist 'staging':
+
+
+    soundcli set http://soundcloud.com/rekado/sets/staging/
+
+
 - Play the local file 'faded.ogg' and display timed comments for the same song
   on soundcloud:
 
