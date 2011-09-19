@@ -5,10 +5,6 @@ require "soundcli/track"
 require "soundcli/helpers"
 
 class SoundCLI
-  def initialize
-    self.authenticate || raise("Authentication error")
-  end
-
   public
 
   def features
@@ -50,6 +46,7 @@ EOF
   end
 
   def me(args=[])
+    self.authenticate || raise("Authentication error")
     params = ["oauth_token=#{@token}"]
     sub = (args.length > 0) ? ('/'+args.join('/')) : ('')
     res = Helpers::get({
@@ -58,10 +55,11 @@ EOF
       :params => params,
       :follow => true
     })
-    puts res[:response]
+    Helpers::data_pp res[:response]
   end
 
   def download(args=[])
+    self.authenticate || raise("Authentication error")
     Helpers::say("Getting track ID...", :info)
     track_id = Track::id(args[0])
     Helpers::sayn(track_id, :info)
@@ -92,6 +90,7 @@ EOF
   # or a track ID.
   # Gets the actual location and streams it via gstreamer
   def stream(args=[])
+    self.authenticate || raise("Authentication error")
     Helpers::say("Getting track ID...", :info)
     track_id = Track::id(args[0])
     Helpers::sayn(track_id, :info)
@@ -129,6 +128,7 @@ EOF
   # or a track ID.
   # Plays the local file and shows soundcloud comments
   def play(args=[])
+    self.authenticate || raise("Authentication error")
     if args.length < 2
       $stderr.puts "I need a local file name and a soundcloud address / track ID."
       return false
@@ -156,6 +156,7 @@ EOF
   end
 
   def set(args=[])
+    self.authenticate || raise("Authentication error")
     $stderr.puts "TODO: playlists are not implemented yet"
     # TODO
   end
@@ -171,7 +172,7 @@ EOF
       :params => params,
       :follow => true
     })
-    puts res[:response]
+    Helpers::data_pp res[:response]
   end
 
   protected

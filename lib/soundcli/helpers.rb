@@ -77,4 +77,24 @@ module Helpers
     formatted.each_line {|l| puts ' '*Settings::all['comment-indent-width']+l}
     print "\n"
   end
+
+  # TODO: pathetic pretty printer
+  def self.data_pp(data)
+    print_hash = lambda do |hash|
+      # get longets key
+      longest = 0
+      hash.each_key { |k| longest = k.length if k.length > longest }
+
+      hash.each_pair do |k,v|
+        next unless v
+        puts "#{k.rjust(longest)} |  #{v}"
+      end
+    end
+
+    if data.class.eql? Hash
+      print_hash.call(data)
+    elsif data.class.eql? Array
+      data.each {|d| print_hash.call(d); print "\n"}
+    end
+  end
 end
