@@ -56,7 +56,7 @@ EOF
       :params => params,
       :follow => true
     })
-    Helpers::data_pp res[:response]
+    Helpers::data_pp(res[:response], :normal)
   end
 
   def download(args=[])
@@ -90,19 +90,20 @@ EOF
   #   http://soundcloud.com/rekado/the-human-song
   # or this
   #   http://api.soundcloud.com/tracks/15909195/stream
-  # or a track ID.
+  # or track IDs.
   # Gets the actual location and streams it via gstreamer
   def stream(args=[])
     args.each do |arg|
       self.authenticate || raise("Authentication error")
       res = Track::info(arg)
-      Helpers::data_pp res
+      Helpers::data_pp(res, :info)
       comments = Track::comments(res['id'], false)
 
       begin
         params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
         Helpers::sayn(res['stream_url']+'?'+params.join('&'), :debug)
-        Helpers::sayn("Now playing: \"#{res['title']}\"", :normal)
+        title = "Now playing: \"#{res['title']}\""
+        Helpers::sayn("\n\n"+title+"\n"+"=" * title.length + "\n", :normal)
         player = Player.new(res['stream_url']+'?'+params.join('&'), comments)
         player.play
       rescue Interrupt
@@ -172,7 +173,7 @@ EOF
       :params => params,
       :follow => true
     })
-    Helpers::data_pp res[:response]
+    Helpers::data_pp(res[:response], :normal)
   end
 
   protected

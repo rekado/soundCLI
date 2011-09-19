@@ -115,8 +115,14 @@ module Helpers
     print "\n"
   end
 
-  # TODO: pathetic pretty printer
-  def self.data_pp(data)
+  # pathetic pretty printer of hashes and arrays of hashes
+  def self.data_pp(data, level)
+    max = Settings::all['verbose'].to_sym
+    return if max.eql? :mute
+
+    levels = [:mute, :normal, :info, :debug]
+    return unless levels.index(level) <= levels.index(max)
+
     print_hash = lambda do |hash|
       # get longets key
       longest = 0
