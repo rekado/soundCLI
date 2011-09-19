@@ -70,7 +70,7 @@ EOF
       return false
     end
 
-    res = Track::info(track_id)
+    res = Helpers::info('tracks', track_id)
     downloadable = res['downloadable']
 
     unless downloadable
@@ -86,41 +86,29 @@ EOF
     puts uri+'?'+params.join('&')
   end
 
-  # Accepts an address like this:
-  #   "http://soundcloud.com/rekado/the-human-song"
+  # Accepts a list of addresses like this:
+  #   http://soundcloud.com/rekado/the-human-song
+  # or this
+  #   http://api.soundcloud.com/tracks/15909195/stream
   # or a track ID.
   # Gets the actual location and streams it via gstreamer
   def stream(args=[])
-    self.authenticate || raise("Authentication error")
-    Helpers::say("Getting track ID...", :info)
-    track_id = Helpers::resolve(args[0])
-    Helpers::sayn(track_id, :info)
+    args.each do |arg|
+      self.authenticate || raise("Authentication error")
+      res = Track::info(arg)
+      Helpers::data_pp res
+      comments = Track::comments(res['id'], false)
 
-    unless track_id
-      $stderr.puts "Failed to fetch track id."
-      return false
-    end
-
-    Helpers::say("Getting stream URI...", :info)
-    res = Track::info(track_id)
-    streamable = res['streamable']
-    unless streamable
-      $stderr.puts "This track is not streamable."
-      return nil
-    end
-    stream = res['stream_url']
-    return unless stream
-
-    comments = Track::comments([track_id], false)
-
-    begin
-      params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
-      Helpers::sayn(stream+'?'+params.join('&'), :debug)
-      player = Player.new(stream+'?'+params.join('&'), comments)
-      player.play
-    rescue Interrupt
-    ensure
-      player.quit if player
+      begin
+        params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
+        Helpers::sayn(res['stream_url']+'?'+params.join('&'), :debug)
+        Helpers::sayn("Now playing: \"#{res['title']}\"", :normal)
+        player = Player.new(res['stream_url']+'?'+params.join('&'), comments)
+        player.play
+      rescue Interrupt
+      ensure
+        player.quit if player
+      end
     end
   end
 
@@ -146,7 +134,7 @@ EOF
       return false
     end
 
-    comments = Track::comments([track_id], false)
+    comments = Track::comments(track_id, false)
     begin
       player = Player.new('file://'+location, comments)
       player.play
@@ -157,10 +145,20 @@ EOF
   end
 
   def set(args=[])
+    Helpers::say("Auth", :info)
     self.authenticate || raise("Authentication error")
     # TODO
+    Helpers::say("Resolv", :info)
     set_id = Helpers::resolve(args[0])
-    puts set_id
+    unless set_id
+      $stderr.puts "Failed to fetch playlist id."
+      return false
+    end
+
+    Helpers::say("Getting playlist info...", :info)
+    res = Helpers::info('playlists', set_id)
+    tracks = res['tracks'].map{|t| t['stream_url']}
+    self.stream tracks
   end
 
   def search_user(query, limit=5)

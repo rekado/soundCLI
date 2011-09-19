@@ -32,7 +32,10 @@ module Helpers
   end
 
   def self.resolve(arg)
-    $stderr.puts "You didn't give me a soundcloud address to resolve." and return unless arg
+    unless arg
+      $stderr.puts "You didn't give me a soundcloud address to resolve."
+      return
+    end
 
     # is an URI, needs resolving
     if arg[/^http/]
@@ -54,6 +57,22 @@ module Helpers
     else
       return arg
     end
+  end
+
+  def self.info(resource, id)
+    params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
+    res = Helpers::get({
+      :target => "#{resource}/#{id}",
+      :ssl    => false,
+      :params => params,
+      :follow => true
+    })
+
+    unless res
+      $stderr.puts "Could not get resource info of type `#{resource}' for id #{id}."
+      return
+    end
+    return res[:response]
   end
 
   def self.say(s, level)

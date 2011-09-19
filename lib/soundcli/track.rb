@@ -3,29 +3,48 @@ require "soundcli/settings"
 require "soundcli/helpers"
 
 module Track
-  def self.info(track_id)
-    params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
-    res = Helpers::get({
-      :target => "tracks/#{track_id}",
-      :ssl    => false,
-      :params => params,
-      :follow => true
-    })
+  def self.id_from_stream(stream_url)
+    m = stream_url.match(/\/([0-9]+)\/stream/)
+    track_id = m[1] if m
+    unless track_id
+      $stderr.puts "Failed to fetch track id."
+      return
+    end
+    track_id
+  end
 
-    unless res
-      $stderr.puts "Could not get track info for track id #{track_id}."
-      return nil
+  def self.info(input)
+    # is already a resolved resource location?
+    if input[/^http:\/\/api.soundcloud.com/]
+      track_id = self.id_from_stream(input)
+    # a normal soundcloud link
+    else
+      Helpers::say("Getting track ID for input #{input}...", :info)
+      track_id = Helpers::resolve(input)
+      Helpers::sayn(track_id, :info)
+
+      unless track_id
+        $stderr.puts "Failed to fetch track id."
+        return
+      end
     end
 
-    return res[:response]
+    Helpers::say("Getting track info...", :info)
+    res = Helpers::info('tracks', track_id)
+    streamable = res['streamable']
+    unless streamable
+      $stderr.puts "This track is not streamable."
+      return
+    end
+    return if res['stream_url'].empty?
+    return res
   end
 
   # gets the comments for a track ID
-  def self.comments(args=[], print=true)
-    arg = args.shift # only take one argument
+  def self.comments(arg, print=true)
     unless arg
       $stderr.puts "You didn't tell me the soundcloud address or the track ID."
-      return
+      return []
     end
 
     comments = []
