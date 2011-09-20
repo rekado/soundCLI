@@ -76,7 +76,7 @@ class Player
     @playbin.play
 
     GLib::Timeout.add(100) do
-      @duration = self.ns_to_str(self.duration.parse[1]) if (@duration.nil?)
+      @duration = self.ns_to_str(self.duration.parse[1])
       @position = self.ns_to_str(self.position.parse[1])
       timestamp = self.position.parse[1]/1000000
 
