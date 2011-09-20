@@ -3,20 +3,22 @@ require "soundcli/settings"
 require "soundcli/helpers"
 
 class Player
-  def initialize(uri, comments)
-    @comments = comments
-    @comment_ptr = 0
-
+  def initialize
     # create the playbin
     @playbin = Gst::ElementFactory.make("playbin2")
-    @playbin.set_property("buffer-size", Settings::all['buffer-size'])
-    @playbin.set_property("uri",uri)
-
     #watch the bus for messages
     bus = @playbin.bus
     bus.add_watch do |bus, message|
       handle_bus_message(message)
     end
+  end
+
+  def set(uri, comments)
+    @comments = comments
+    @comment_ptr = 0
+
+    @playbin.set_property("buffer-size", Settings::all['buffer-size'])
+    @playbin.set_property("uri",uri)
   end
 
   protected

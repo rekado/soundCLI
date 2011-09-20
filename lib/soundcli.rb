@@ -96,6 +96,8 @@ EOF
   # or track IDs.
   # Gets the actual location and streams it via gstreamer
   def stream(args=[])
+    player = Player.new()
+
     args.each do |arg|
       self.authenticate || raise("Authentication error")
       res = Track::info(arg)
@@ -107,7 +109,7 @@ EOF
         Helpers::sayn(res['stream_url']+'?'+params.join('&'), :debug)
         title = "Now playing: \"#{res['title']}\""
         Helpers::sayn("\n\n"+title+"\n"+"=" * title.length, :normal)
-        player = Player.new(res['stream_url']+'?'+params.join('&'), comments)
+        player.set(res['stream_url']+'?'+params.join('&'), comments)
         player.play
       rescue Interrupt
       ensure
@@ -140,7 +142,8 @@ EOF
 
     comments = Track::comments(track_id, false)
     begin
-      player = Player.new('file://'+location, comments)
+      player = Player.new()
+      player.set('file://'+location, comments)
       player.play
     rescue Interrupt
     ensure
