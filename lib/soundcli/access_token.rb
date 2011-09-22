@@ -8,6 +8,18 @@ module AccessToken
     return Settings::all['path']+'/auth'
   end
 
+  def self.destroy
+    if File.exists?(auth_file)
+      if File.unlink(auth_file)
+        Helpers::sayn("Deleted authentication and refresh token", :normal)
+      else
+        $stderr.puts("Failed to remove authentication file.")
+      end
+    else
+      $stderr.puts("Cowardly refusing to remove non-existing authentication file. Schroedinger's cat is dead.")
+    end
+  end
+
   def self.expired?
     token = latest
 

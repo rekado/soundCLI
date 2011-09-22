@@ -87,6 +87,17 @@ module Helpers
     say("#{s}\n", level)
   end
 
+  def self.bye
+    bye = [
+      "Fare thee well, fare thee well, you that was once dear to me.\n   --- Think of me with kindness",
+      "You say goodbye and I say hello.\n   --- Hello, Goodbye",
+      "And in the end the love you take is equal to the love you make\n   --- The End",
+      "Whisper words of wisdom, let it be.\n    --- Let it be",
+      "Sugar plum fairy, sugar plum fairy.\n    --- A day in the life",
+    ]
+    self.sayn("\n"+bye[rand(bye.length)], :normal)
+  end
+
   def self.split_text(text)
     words = text.split(' ')
     line_length = 0

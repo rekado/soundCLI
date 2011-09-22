@@ -182,6 +182,10 @@ EOF
     Helpers::data_pp(res[:response], :normal)
   end
 
+  def revoke
+    AccessToken::destroy
+  end
+
   protected
 
   def authenticate
