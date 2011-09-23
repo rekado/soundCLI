@@ -9,7 +9,10 @@ begin
   Helpers::data_pp(Settings::all, :debug)
 
   app = SoundCLI.new
-  app.usage and Process.exit(1) if args.length < 1
+  if args.length < 1
+    app.usage
+    Process.exit(1)
+  end
 
   if app.features.include? args[0].to_sym
     if args[1]
