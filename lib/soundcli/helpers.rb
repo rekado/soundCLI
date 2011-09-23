@@ -60,7 +60,8 @@ module Helpers
   end
 
   def self.info(resource, id)
-    params = ["access_token=#{AccessToken::get}","client_id=#{Settings::CLIENT_ID}"]
+    #params = ["access_token=#{AccessToken::get}","client_id=#{Settings::CLIENT_ID}"]
+    params = ["client_id=#{Settings::CLIENT_ID}"]
     res = Helpers::get({
       :target => "#{resource}/#{id}",
       :ssl    => false,
