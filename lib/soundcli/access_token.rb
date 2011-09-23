@@ -122,8 +122,6 @@ private
     rescue
       $stderr.puts $!
       nil
-    ensure
-      File.close(auth_file) if File.exist? auth_file
     end
   end
 
