@@ -24,6 +24,12 @@ respective positions.
     soundcli set http://soundcloud.com/rekado/sets/staging/
 
 
+- Playback all of your favourites:
+
+
+    soundcli me favorites
+
+
 - Play the local file 'faded.ogg' and display timed comments for the same song
   on soundcloud:
 
@@ -33,16 +39,16 @@ respective positions.
 
 ## Installation
 
-You can either install this as a gem or execute it without installation. To
-simply run soundcli, issue the following command from within the soundcli
-directory.
+You can either install this as a gem from RubyGems.org, build the gem yourself,
+or execute it without installation. To simply run soundcli, issue the following
+command from within the soundcli directory.
 
     ruby -Ilib ./bin/soundcli http://soundcloud.com/rekado/chroma
 
 Here's how to build and install this gem manually.
 
     gem build soundcli.gemspec
-    gem install ./soundcli-0.1.gem
+    gem install ./soundcli-0.0.4.gem
 
 Then you can use this simpler command to stream a song:
 

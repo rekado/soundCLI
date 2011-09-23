@@ -30,6 +30,9 @@ EXAMPLES:
    Stream a whole playlist:
        #{$0} set http://soundcloud.com/rekado/sets/staging/
 
+   Stream all of your favourite tracks:
+       #{$0} me favorites
+
 
 
 UNFINISHED STUFF:
