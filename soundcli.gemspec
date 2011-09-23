@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name          = 'soundcli'
-  s.version       = '0.0.4'
-  s.date          = '2011-09-23'
+  s.version       = '0.0.5'
+  s.date          = '2011-09-24'
   s.summary       = "CLI client for soundcloud"
   s.description   = "Stream music from soundcloud on the command line and read timed comments."
   s.authors       = ["Ricardo Wurmus"]
