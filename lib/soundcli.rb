@@ -55,9 +55,9 @@ EOF
   def me(args=[])
     token = AccessToken::get
     params = ["oauth_token=#{token}"]
-    if args[0].eql? 'favorites'
+    if ['favorites', 'tracks'].include? args[0]
       res = Helpers::get({
-        :target => 'me/favorites',
+        :target => 'me/'+args[0],
         :ssl    => true,
         :params => params,
         :follow => true

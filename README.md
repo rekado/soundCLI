@@ -30,6 +30,12 @@ respective positions.
     soundcli me favorites
 
 
+- Playback all of your own tracks:
+
+
+    soundcli me tracks
+
+
 - Play the local file 'faded.ogg' and display timed comments for the same song
   on soundcloud:
 
