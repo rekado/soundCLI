@@ -16,11 +16,16 @@ module Settings
     @config
   end
 
-  def self.init(arguments)
-    if arguments
-      # TODO: build config from arguments
-    end
+  def self.init(switches)
     $stderr.puts "No config file found or error parsing it. Ignoring." unless parse_config
+    # build config from arguments
+    if switches
+      switches.each do |s|
+        if m = s.match(/^--(.*)=(.*)/)
+          @config[m[1]] = m[2] unless m[1].empty? or m[2].empty?
+        end
+      end
+    end
 
     return true if all['auth-type'] == 'login'
 

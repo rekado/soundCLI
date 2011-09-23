@@ -2,27 +2,27 @@
 
 begin
   require 'soundcli'
+  switches = ARGV.select{|i|i[/^--/]}
+  args = ARGV - switches
 
-  Settings::init(ARGV)
+  Settings::init(switches)
+  Helpers::data_pp(Settings::all, :debug)
+
   app = SoundCLI.new
+  app.usage and Process.exit(1) if args.length < 1
 
-  if ARGV.length < 1
-    puts app.usage
-    Process.exit 1
-  end
-
-  if app.features.include? ARGV[0].to_sym
-    if ARGV[1]
-      app.method(ARGV[0]).call(ARGV[1..-1])
+  if app.features.include? args[0].to_sym
+    if args[1]
+      app.method(args[0]).call(args[1..-1])
     else
-      app.method(ARGV[0]).call
+      app.method(args[0]).call
     end
   else
     # stream if the only argument is a soundcloud link or an id
-    if ARGV[0][/^http:\/\/soundcloud/] or ARGV[0][/[0-9]+/]
-      app.stream [ARGV[0]]
+    if args[0][/^http:\/\/soundcloud/] or args[0][/[0-9]+/]
+      app.stream [args[0]]
     else
-      $stderr.puts "No such action: #{ARGV[0]}"
+      $stderr.puts "No such action: #{args[0]}"
       app.usage and Process.exit(1)
     end
   end
