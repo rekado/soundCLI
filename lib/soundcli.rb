@@ -52,14 +52,25 @@ EOF
   def me(args=[])
     token = AccessToken::get
     params = ["oauth_token=#{token}"]
-    sub = (args.length > 0) ? ('/'+args.join('/')) : ('')
-    res = Helpers::get({
-      :target => 'me'+sub,
-      :ssl    => true,
-      :params => params,
-      :follow => true
-    })
-    Helpers::data_pp(res[:response], :normal)
+    if args[0].eql? 'favorites'
+      res = Helpers::get({
+        :target => 'me/favorites',
+        :ssl    => true,
+        :params => params,
+        :follow => true
+      })
+      tracks = res[:response].map{|i|i['stream_url']}
+      self.stream tracks
+    else
+      sub = (args.length > 0) ? ('/'+args.join('/')) : ('')
+      res = Helpers::get({
+        :target => 'me'+sub,
+        :ssl    => true,
+        :params => params,
+        :follow => true
+      })
+      Helpers::data_pp(res[:response], :normal)
+    end
   end
 
   def download(args=[])
@@ -165,6 +176,7 @@ EOF
 
     Helpers::say("Getting playlist info...", :info)
     res = Helpers::info('playlists', set_id)
+    Helpers::data_pp(res['tracks'], :debug)
     tracks = res['tracks'].map{|t| t['stream_url']}
     self.stream tracks
   end

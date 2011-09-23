@@ -15,7 +15,7 @@ module Track
 
   def self.info(input)
     # is already a resolved resource location?
-    if input[/^http:\/\/api.soundcloud.com/]
+    if input[/^(http|https):\/\/api.soundcloud.com/]
       track_id = self.id_from_stream(input)
     # a normal soundcloud link
     else
