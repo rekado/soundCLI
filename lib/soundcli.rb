@@ -99,13 +99,14 @@ EOF
     player = Player.new()
 
     args.each do |arg|
-      self.authenticate || raise("Authentication error")
       res = Track::info(arg)
       Helpers::data_pp(res, :info)
       comments = Track::comments(res['id'], false)
 
       begin
-        params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
+        params = ["client_id=#{Settings::CLIENT_ID}"]
+        # TODO: token is only needed for private tracks
+        #params.push "access_token=#{@token}" if self.authenticated?
         Helpers::sayn(res['stream_url']+'?'+params.join('&'), :debug)
         title = "Now playing: \"#{res['title']}\""
         Helpers::sayn("\n\n"+title+"\n"+"=" * title.length, :normal)
@@ -123,7 +124,6 @@ EOF
   # or a track ID.
   # Plays the local file and shows soundcloud comments
   def play(args=[])
-    self.authenticate || raise("Authentication error")
     if args.length < 2
       $stderr.puts "I need a local file name and a soundcloud address / track ID."
       return false
@@ -152,10 +152,6 @@ EOF
   end
 
   def set(args=[])
-    Helpers::say("Auth", :info)
-    self.authenticate || raise("Authentication error")
-    # TODO
-    Helpers::say("Resolv", :info)
     set_id = Helpers::resolve(args[0])
     unless set_id
       $stderr.puts "Failed to fetch playlist id."
@@ -198,7 +194,7 @@ EOF
       return true
     else
       $stderr.puts "Could not authenticate."
-      return false
+      exit 1
     end
   end
 
