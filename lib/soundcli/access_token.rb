@@ -96,6 +96,9 @@ module AccessToken
     begin
       c.http_post(params)
       auth = c.body_str
+      raise 'no response from server' unless auth
+      raise auth['error'] if auth.has_key? 'error'
+
       File.open(auth_file, 'w') {|f| f.write(auth) } if auth
       JSON.parse(auth)
     rescue
