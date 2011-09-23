@@ -50,8 +50,8 @@ EOF
   end
 
   def me(args=[])
-    self.authenticate || raise("Authentication error")
-    params = ["oauth_token=#{@token}"]
+    token = AccessToken::get
+    params = ["oauth_token=#{token}"]
     sub = (args.length > 0) ? ('/'+args.join('/')) : ('')
     res = Helpers::get({
       :target => 'me'+sub,
@@ -63,7 +63,7 @@ EOF
   end
 
   def download(args=[])
-    self.authenticate || raise("Authentication error")
+    token = AccessToken::get
     Helpers::say("Getting track ID...", :info)
     track_id = Helpers::resolve(args[0])
     Helpers::sayn(track_id, :info)
@@ -85,7 +85,7 @@ EOF
     return false unless uri
 
     #TODO: curl this
-    params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
+    params = ["access_token=#{token}","client_id=#{Settings::CLIENT_ID}"]
     puts uri+'?'+params.join('&')
   end
 
@@ -99,14 +99,19 @@ EOF
     player = Player.new()
 
     args.each do |arg|
-      res = Track::info(arg)
-      Helpers::data_pp(res, :info)
-      comments = Track::comments(res['id'], false)
+      begin
+        res = Track::info(arg)
+        Helpers::data_pp(res, :info)
+        comments = Track::comments(res['id'], false)
+      rescue
+        $stderr.puts $!
+        next
+      end
 
       begin
         params = ["client_id=#{Settings::CLIENT_ID}"]
-        # TODO: token is only needed for private tracks
-        #params.push "access_token=#{@token}" if self.authenticated?
+        # TODO: token is only needed for private tracks, but private tracks fail earlier
+        #params.push "access_token=#{token}" if self.authenticated?
         Helpers::sayn(res['stream_url']+'?'+params.join('&'), :debug)
         title = "Now playing: \"#{res['title']}\""
         Helpers::sayn("\n\n"+title+"\n"+"=" * title.length, :normal)
@@ -180,22 +185,6 @@ EOF
 
   def revoke
     AccessToken::destroy
-  end
-
-  protected
-
-  def authenticate
-    token_data = AccessToken::latest
-    token_data = AccessToken::new unless token_data
-    AccessToken::refresh if token_data and AccessToken::expired?
-
-    if token_data and token_data.has_key? 'access_token'
-      @token = token_data['access_token']
-      return true
-    else
-      $stderr.puts "Could not authenticate."
-      exit 1
-    end
   end
 
 end

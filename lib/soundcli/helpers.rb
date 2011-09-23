@@ -60,7 +60,7 @@ module Helpers
   end
 
   def self.info(resource, id)
-    params = ["access_token=#{@token}","client_id=#{Settings::CLIENT_ID}"]
+    params = ["access_token=#{AccessToken::get}","client_id=#{Settings::CLIENT_ID}"]
     res = Helpers::get({
       :target => "#{resource}/#{id}",
       :ssl    => false,
@@ -68,10 +68,8 @@ module Helpers
       :follow => true
     })
 
-    unless res
-      $stderr.puts "Could not get resource info of type `#{resource}' for id #{id}."
-      return
-    end
+    raise "Could not get resource info of type `#{resource}' for id #{id}." unless res
+    raise res[:response]['errors'][0]['error_message'] if res[:response].has_key? 'errors'
     return res[:response]
   end
 

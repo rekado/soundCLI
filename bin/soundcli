@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'soundcli'
-
 begin
+  require 'soundcli'
+
   Settings::init(ARGV)
   app = SoundCLI.new
 
@@ -26,6 +26,8 @@ begin
       app.usage and Process.exit(1)
     end
   end
-rescue Interrupt
+rescue Exception
+  $stderr.puts $!
+else
   Helpers::bye
 end

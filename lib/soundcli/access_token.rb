@@ -4,8 +4,19 @@ require 'uri'
 require 'soundcli/settings'
 
 module AccessToken
-  def self.auth_file
-    return Settings::all['path']+'/auth'
+
+public
+
+  def self.get
+    token_data = self.latest
+    token_data = self.new unless token_data
+    self.refresh if token_data and self.expired?
+
+    if token_data and token_data.has_key? 'access_token'
+      return token_data['access_token']
+    else
+      raise "Failed to authenticate."
+    end
   end
 
   def self.destroy
@@ -18,6 +29,12 @@ module AccessToken
     else
       $stderr.puts("Cowardly refusing to remove non-existing authentication file. Schroedinger's cat is dead.")
     end
+  end
+
+private
+
+  def self.auth_file
+    return Settings::all['path']+'/auth'
   end
 
   def self.expired?
@@ -33,7 +50,7 @@ module AccessToken
 
   def self.refresh
     token = latest
-    $stderr.puts "There is no token to refresh." and return false unless token
+    raise "There is no token to refresh." unless token
     params = ['grant_type=refresh_token',
       "refresh_token=#{token['refresh_token']}"]
     post(params)
@@ -97,13 +114,16 @@ module AccessToken
       c.http_post(params)
       auth = c.body_str
       raise 'no response from server' unless auth
-      raise auth['error'] if auth.has_key? 'error'
+      hash = JSON.parse(auth)
+      raise hash['error'] if hash.has_key? 'error'
 
-      File.open(auth_file, 'w') {|f| f.write(auth) } if auth
-      JSON.parse(auth)
+      File.open(auth_file, 'w') {|f| f.write(auth) }
+      hash
     rescue
-      $stderr.puts "Could not post/save access token."
+      $stderr.puts $!
       nil
+    ensure
+      File.close(auth_file) if File.exist? auth_file
     end
   end
 

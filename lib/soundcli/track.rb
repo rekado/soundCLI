@@ -22,21 +22,14 @@ module Track
       Helpers::say("Getting track ID for input #{input}...", :info)
       track_id = Helpers::resolve(input)
       Helpers::sayn(track_id, :info)
-
-      unless track_id
-        $stderr.puts "Failed to fetch track id."
-        return
-      end
+      raise "Failed to fetch track id." unless track_id
     end
 
     Helpers::say("Getting track info...", :info)
     res = Helpers::info('tracks', track_id)
     streamable = res['streamable']
-    unless streamable
-      $stderr.puts "This track is not streamable."
-      return
-    end
-    return if res['stream_url'].empty?
+    raise "This track is not streamable." unless streamable
+    raise "Oops, no stream URL for this track." if res['stream_url'].empty?
     return res
   end
 
