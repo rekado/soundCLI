@@ -4,6 +4,8 @@ soundCLI is a command line client for streaming music from soundcloud. Timed
 comments are displayed on the command line as the playback reaches their
 respective positions.
 
+[![button](http://api.flattr.com/button/flattr-badge-large.png "Flattr this")](http://flattr.com/thing/397352/soundCLI-a-soundcloud-client-for-the-command-line)
+
 ## Examples
 
 - Stream 'Chroma' from soundcloud (the keyword 'stream' is optional):
