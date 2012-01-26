@@ -51,7 +51,7 @@ EOF
 
   def self.parse_config
     config_file = "#{PRG_NAME.downcase}.conf"
-    config_path = ENV['XDG_CONFIG_HOME'] or ENV['HOME']+'/.config'
+    config_path = ENV['XDG_CONFIG_HOME'] || ENV['HOME']+'/.config'
     config_path = config_path + "/#{PRG_NAME.downcase}"
     cf = "#{config_path}/#{config_file}"
     @config['path'] = config_path
