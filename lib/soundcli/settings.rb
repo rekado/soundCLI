@@ -83,8 +83,7 @@ EOF
       json.gsub!(/^([^ :]*)/, "\"\\1\"")
       # add commas at the end of lines and wrap in braces
       json.gsub!(/\n/,",")
-      json = "{" << json
-      json[-1] = "}"
+      json = "{#{json}}"
       Helpers::sayn(json, :debug)
 
       @config.merge!(JSON.parse(json))
