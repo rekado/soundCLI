@@ -51,7 +51,7 @@ EOF
 
   def self.parse_config
     config_file = "#{PRG_NAME.downcase}.conf"
-    config_path = ENV['XDG_CONFIG_HOME'] or ENV['HOME']+'/.config'
+    config_path = ENV['XDG_CONFIG_HOME'] || ENV['HOME']+'/.config'
     config_path = config_path + "/#{PRG_NAME.downcase}"
     cf = "#{config_path}/#{config_file}"
     @config['path'] = config_path
@@ -83,8 +83,7 @@ EOF
       json.gsub!(/^([^ :]*)/, "\"\\1\"")
       # add commas at the end of lines and wrap in braces
       json.gsub!(/\n/,",")
-      json = "{" << json
-      json[-1] = "}"
+      json = "{#{json}}"
       Helpers::sayn(json, :debug)
 
       @config.merge!(JSON.parse(json))
