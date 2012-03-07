@@ -1,0 +1,44 @@
+# Maintainer: Ricardo Wurmus <maintainer name + @gmail.com>
+pkgname=soundcli-git
+pkgver=20120307
+pkgrel=1
+pkgdesc="Command line interface to stream/download songs from soundcloud.com"
+url="http://soundcli.elephly.net"
+arch=('x86_64' 'i686')
+license=('GPLv3')
+depends=('ruby' 'ruby-gstreamer' 'ruby-curb' 'ruby-json' 'gstreamer0.10-good')
+makedepends=('git')
+conflicts=('soundcli')
+install=soundcli.install
+md5sums=()
+
+_gitroot="git://github.com/rekado/soundCLI.git"
+_gitname="soundcli"
+
+build() {
+  cd "${srcdir}"
+  msg "Connecting to GIT server...."
+
+  if [ -d $_gitname ] ; then
+    cd $_gitname && git pull origin
+    msg "The local files have been updated."
+  else
+    git clone -b master $_gitroot $_gitname
+  fi
+
+  msg "GIT checkout done or server timeout"
+
+  if [ -d "${srcdir}/${_gitname}-build" ]
+  then
+    rm -rf "${srcdir}/${_gitname}-build"
+  fi
+
+  cp -r "${srcdir}/${_gitname}" "${srcdir}/${_gitname}-build"
+  cd "${srcdir}/${_gitname}-build"
+
+  msg "Running setup.rb..."
+
+  ruby ./setup.rb all --prefix=${pkgdir}/usr \
+    --siterubyver=${pkgdir}/usr/lib/ruby/site_ruby/1.9.1/ \
+    --sysconfdir=${pkgdir}/etc
+}
