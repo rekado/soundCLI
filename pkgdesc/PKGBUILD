@@ -1,7 +1,7 @@
 # Maintainer: Ricardo Wurmus <maintainer name + @gmail.com>
 pkgname=soundcli
 pkgver=0.0.5
-pkgrel=1
+pkgrel=2
 pkgdesc="Command line interface to stream/download songs from soundcloud.com"
 url="http://soundcli.elephly.net"
 arch=('x86_64' 'i686')
