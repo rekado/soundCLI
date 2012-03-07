@@ -90,7 +90,7 @@ will be saved to $XDG_CONFIG_HOME/soundcli/auth.
 
 ## Dependencies
 
-- ruby (I'm using 1.9.2, but lower versions might work, too)
+- ruby (I'm using 1.9.2 and above, but lower versions might work, too. Ruby 1.8.7 doesn't seem to work.)
 
 - gstreamer bindings for ruby (gstreamer)
 
@@ -118,6 +118,19 @@ will be saved to $XDG_CONFIG_HOME/soundcli/auth.
     no such file to load -- json/gst/curb in ...
 
   **A:** You need to install the gems listed in the section DEPENDENCIES
+
+
+  **Q:** During installation of the gem I get this error:
+
+    checking for gstreamer-0.10... yes
+    checking for gstreamer-plugins-base-0.10... no
+    *** extconf.rb failed ***
+    Could not create Makefile due to some reason, probably lack of
+    necessary libraries and/or headers.  Check the mkmf.log file for more
+    details.  You may need configuration options.
+
+  **A:** You are missing the gstreamer base plugins. If you are on Mac, you should install `gst-plugins-base` with brew. On Archlinux the package is called `gstreamer0.10-base-plugins`.
+
 
 
 ## License
