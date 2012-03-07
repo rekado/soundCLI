@@ -1,7 +1,7 @@
 #
 # setup.rb
 #
-# Copyright (c) 2000-2005 Minero Aoki
+# Copyright (c) 2000-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -104,7 +104,7 @@ class ConfigTable
   def remove(name)
     item = lookup(name)
     @items.delete_if {|i| i.name == name }
-    @table.delete_if {|name, i| i.name == name }
+    @table.delete_if {|nm, i| i.name == nm }
     item
   end
 
@@ -189,7 +189,7 @@ class ConfigTable
       path.sub(/\A#{Regexp.quote(c['prefix'])}/, '$prefix')
     }
 
-    if arg = c['configure_args'].split.detect {|arg| /--with-make-prog=/ =~ arg }
+    if arg = c['configure_args'].split.detect {|a| /--with-make-prog=/ =~ a }
       makeprog = arg.sub(/'/, '').split(/=/, 2)[1]
     else
       makeprog = 'make'
@@ -296,13 +296,14 @@ class ConfigTable
     ALIASES.each do |ali, name|
       @table[ali] = @table[name]
     end
-    @items.freeze
-    @table.freeze
-    @options_re = /\A--(#{@table.keys.join('|')})(?:=(.*))?\z/
+  end
+
+  def options_re
+    /\A--(#{@table.keys.join('|')})(?:=(.*))?\z/
   end
 
   def parse_opt(opt)
-    m = @options_re.match(opt) or setup_rb_error "config: unknown option #{opt}"
+    m = options_re().match(opt) or setup_rb_error "config: unknown option #{opt}"
     m.to_a[1,2]
   end
 
@@ -751,7 +752,7 @@ end
 class ToplevelInstaller
 
   Version   = '3.4.1'
-  Copyright = 'Copyright (c) 2000-2005 Minero Aoki'
+  Copyright = 'Copyright (c) 2000-2006 Minero Aoki'
 
   TASKS = [
     [ 'all',      'do config, setup, then install' ],
@@ -778,7 +779,7 @@ class ToplevelInstaller
   end
 
   def ToplevelInstaller.load_rbconfig
-    if arg = ARGV.detect {|arg| /\A--rbconfig=/ =~ arg }
+    if arg = ARGV.detect {|a| /\A--rbconfig=/ =~ a }
       ARGV.delete(arg)
       load File.expand_path(arg.split(/=/, 2)[1])
       $".push 'rbconfig.rb'
@@ -919,8 +920,8 @@ class ToplevelInstaller
       end
       set.push name
     end
-    evalopt.each do |name, value|
-      @config.lookup(name).evaluate value, @config
+    evalopt.each do |n, v|
+      @config.lookup(n).evaluate v, @config
     end
     # Check if configuration is valid
     set.each do |n|
@@ -1343,7 +1344,11 @@ class Installer
   end
 
   def install_dir_bin(rel)
-    install_files targetfiles(), "#{config('bindir')}/#{rel}", 0755
+    install_files targetfiles(), "#{config('bindir')}/#{rel}", 0755, strip_ext?
+  end
+
+  def strip_ext?
+    /mswin|mingw/ !~ RUBY_PLATFORM
   end
 
   def install_dir_lib(rel)
@@ -1371,10 +1376,15 @@ class Installer
     install_files targetfiles(), "#{config('mandir')}/#{rel}", 0644
   end
 
-  def install_files(list, dest, mode)
+  def install_files(list, dest, mode, stripext = false)
     mkdir_p dest, @config.install_prefix
     list.each do |fname|
-      install fname, dest, mode, @config.install_prefix
+      if stripext
+        install fname, "#{dest}/#{File.basename(fname, '.*')}",
+                mode, @config.install_prefix
+      else
+        install fname, dest, mode, @config.install_prefix
+      end
     end
   end
 
@@ -1418,7 +1428,7 @@ class Installer
 
   def hookfiles
     %w( pre-%s post-%s pre-%s.rb post-%s.rb ).map {|fmt|
-      %w( config setup install clean ).map {|t| sprintf(fmt, t) }
+      %w( config setup install clean distclean ).map {|t| sprintf(fmt, t) }
     }.flatten
   end
 
@@ -1462,9 +1472,13 @@ class Installer
     rescue LoadError
       setup_rb_error 'test/unit cannot loaded.  You need Ruby 1.8 or later to invoke this task.'
     end
-    runner = Test::Unit::AutoRunner.new(true)
-    runner.to_run << TESTDIR
-    runner.run
+    begin
+      runner = Test::Unit::AutoRunner.new(true)
+      runner.to_run << TESTDIR
+      runner.run
+    rescue NameError   # seems Ruby 1.9 (MiniTest)
+      Test::Unit.setup_argv
+    end
   end
 
   #
@@ -1556,6 +1570,7 @@ class Installer
     path = [ "#{curr_srcdir()}/#{id}",
              "#{curr_srcdir()}/#{id}.rb" ].detect {|cand| File.file?(cand) }
     return unless path
+    $stderr.puts "invoking hook script #{path}" if verbose?
     begin
       instance_eval File.read(path), path, 1
     rescue
