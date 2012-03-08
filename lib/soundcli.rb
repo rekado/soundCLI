@@ -52,6 +52,23 @@ EOF
 
   end
 
+  def user(args=[])
+    res = self.search_user(args[0], 1)
+    id = res[0]['id']
+
+    params = ["client_id=#{Settings::CLIENT_ID}"]
+    res = Helpers::get({
+      :target => "users/#{id}/tracks",
+      :ssl    => true,
+      :params => params,
+      :follow => true
+    })
+    return unless res
+
+    tracks = res[:response].map{|i|i['stream_url']}
+    self.stream tracks
+  end
+
   def me(args=[])
     token = AccessToken::get
     params = ["oauth_token=#{token}"]
