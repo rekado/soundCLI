@@ -33,6 +33,9 @@ EXAMPLES:
    Stream all of your favourite tracks:
        #{$0} me favorites
 
+   Stream all of the tracks on your dashboard:
+       #{$0} me activities
+
 
 
 UNFINISHED STUFF:
@@ -80,6 +83,16 @@ EOF
         :follow => true
       })
       tracks = res[:response].map{|i|i['stream_url']}
+      self.stream tracks
+    elsif ['activities'].include? args[0]
+      res = Helpers::get({
+        :target => 'me/'+args[0],
+        :ssl    => true,
+        :params => params,
+        :follow => true
+      })
+      tracks = res[:response]['collection'].select{|i| i['type'].eql? 'track'}
+      tracks = tracks.map{|i|i['origin']['stream_url']}
       self.stream tracks
     else
       sub = (args.length > 0) ? ('/'+args.join('/')) : ('')
