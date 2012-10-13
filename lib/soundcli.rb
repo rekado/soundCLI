@@ -82,6 +82,7 @@ EOF
         :params => params,
         :follow => true
       })
+      return unless res
       tracks = res[:response].map{|i|i['stream_url']}
       self.stream tracks
     elsif ['activities'].include? args[0]
@@ -91,6 +92,7 @@ EOF
         :params => params,
         :follow => true
       })
+      return unless res
       tracks = res[:response]['collection'].select{|i| i['type'].eql? 'track'}
       tracks = tracks.map{|i|i['origin']['stream_url']}
       self.stream tracks
@@ -102,6 +104,7 @@ EOF
         :params => params,
         :follow => true
       })
+      return unless res
       Helpers::data_pp(res[:response], :normal)
     end
   end
@@ -225,7 +228,9 @@ EOF
       :params => params,
       :follow => true
     })
+    return unless res
     Helpers::data_pp(res[:response], :normal)
+    return res[:response]
   end
 
   def revoke
