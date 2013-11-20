@@ -56,7 +56,7 @@ command from within the soundcli directory.
 Here's how to build and install this gem manually.
 
     gem build soundcli.gemspec
-    gem install ./soundcli-0.0.4.gem
+    gem install ./soundcli-0.0.5.gem
 
 Then you can use this simpler command to stream a song:
 
