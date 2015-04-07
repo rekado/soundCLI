@@ -13,7 +13,7 @@ public
     self.refresh if token_data and self.expired?
 
     if token_data and token_data.has_key? 'access_token'
-      return token_data['access_token']
+      token_data['access_token']
     else
       raise "Failed to authenticate."
     end
@@ -34,7 +34,7 @@ public
 private
 
   def self.auth_file
-    return Settings::all['path']+'/auth'
+    Settings::all['path']+'/auth'
   end
 
   def self.expired?

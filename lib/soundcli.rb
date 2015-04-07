@@ -9,7 +9,7 @@ class SoundCLI
 
   def features
     hidden = [:usage, :features]
-    return (SoundCLI.public_instance_methods - Object.methods - hidden)
+    SoundCLI.public_instance_methods - Object.methods - hidden
   end
 
   def usage
@@ -230,7 +230,7 @@ EOF
     })
     return unless res
     Helpers::data_pp(res[:response], :normal)
-    return res[:response]
+    res[:response]
   end
 
   def revoke

@@ -30,7 +30,7 @@ module Track
     streamable = res['streamable']
     raise "This track is not streamable." unless streamable
     raise "Oops, no stream URL for this track." if res['stream_url'].empty?
-    return res
+    res
   end
 
   # gets the comments for a track ID
@@ -63,7 +63,7 @@ module Track
     end
 
     puts comments if print
-    return comments
+    comments
   end
 
 end

@@ -71,7 +71,7 @@ module Helpers
 
     raise "Could not get resource info of type `#{resource}' for id #{id}." unless res
     raise res[:response]['errors'][0]['error_message'] if res[:response].has_key? 'errors'
-    return res[:response]
+    res[:response]
   end
 
   def self.say(s, level)

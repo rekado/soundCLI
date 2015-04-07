@@ -29,11 +29,10 @@ class Player
     minutes = (time/60 - hours * 60).to_i
     seconds = (time - (minutes * 60 + hours * 3600))
     if hours > 0
-      return "%02d:%02d:%02d" % [hours, minutes, seconds]
+      "%02d:%02d:%02d" % [hours, minutes, seconds]
     else
-      return "%02d:%02d" % [minutes, seconds]
+      "%02d:%02d" % [minutes, seconds]
     end
-
   end
 
   # get position of the playbin
@@ -41,11 +40,10 @@ class Player
     begin
       @query_position = Gst::QueryPosition.new(Gst::Format::TIME)
       @playbin.query(@query_position)
-      pos = @query_position
+      @query_position
     rescue
-      pos = 0
+      0
     end
-    return pos
   end
 
   # get song duration
@@ -53,18 +51,17 @@ class Player
     begin
       @query_duration = Gst::QueryDuration.new(Gst::Format::TIME)
       @playbin.query(@query_duration)
-      pos = @query_duration
+      @query_duration
     rescue
-      pos = 0
+      0
     end
-    return pos
   end
 
   public
   #set or get the volume
   def volume(v)
     @playbin.set_property("volume", v) if v and (0..1).cover? v
-    return @playbin.get_property("volume")
+    @playbin.get_property("volume")
   end
 
   def quit
@@ -103,12 +100,10 @@ class Player
     iochannel = GLib::IOChannel.new(1)
     iochannel.add_watch(GLib::IOChannel::IN) {|channel, condition|
       input = channel.readline
-      if input["\n"]
-        if playing?
-          self.pause
-        else
-          self.resume
-        end
+      if input["\n"] && playing?
+        self.pause
+      else
+        self.resume
       end
       true
     }
@@ -151,14 +146,14 @@ class Player
   end
 
   def done?
-    return (@playbin.get_state[1] == Gst::State::NULL)
+    @playbin.get_state[1] == Gst::State::NULL
   end
 
   def playing?
-    return (@playbin.get_state[1] == Gst::State::PLAYING)
+    @playbin.get_state[1] == Gst::State::PLAYING
   end
 
   def paused?
-    return (@playbin.get_state[1] == Gst::State::PAUSED)
+    @playbin.get_state[1] == Gst::State::PAUSED
   end
 end

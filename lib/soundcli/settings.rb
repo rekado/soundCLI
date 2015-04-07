@@ -87,10 +87,10 @@ EOF
       Helpers::sayn(json, :debug)
 
       @config.merge!(JSON.parse(json))
-      return true
+      true
     rescue
       $stderr.puts "Your configuration file contains errors."
-      return false
+      false
     end
   end
 end
